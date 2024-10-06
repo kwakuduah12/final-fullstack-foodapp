@@ -1,0 +1,24 @@
+# Node.gitignore
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# EC2 server and sensitive information
+*.pem
+*.key
+
+# Ignore AWS SDK, credentials, and config
+.aws/
+config
+credentials
+
+# DynamoDB
+*.dynamodb
