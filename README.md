@@ -1,57 +1,133 @@
-Food Ordering App Backend
-The backend is hosted on an AWS EC2 instance, using DynamoDB as the database. This read me will walk you through how to connect to the server and perform POST, GET, PUT, and PATCH requests to interact with the food orders.
-Requirements
-AWS EC2 Instance: The server is hosted on AWS EC2. Make sure you have access to the instance. Access is not currently restricted
-DynamoDB Table: A DynamoDB table named FoodOrders is required with orderId as the partition key.
-Connection Details
-Server IP: 3.142.74.220
-Server Port: 3000
-Region: us-east-2
-Steps to Connect to the Server
-1. SSH into the EC2 Instance
-Make sure you have the correct permissions on your PEM file and the SSH configuration set up properly.
-Copy the code:
-chmod 400 ~/Downloads/FoodRedo.pem
+# Final Fullstack FoodApp
 
-Then, connect to the EC2 instance using SSH:
-Copy the code:
-ssh -i ~/Downloads/FoodRedo.pem ubuntu@3.142.74.220
+This project is a full-stack food ordering application that uses a **React.js** frontend and an **AWS-based** backend, utilizing **DynamoDB** for the database. It supports functionalities such as managing orders, and creating, updating, and deleting items.
 
-2. Navigate to the Server Directory
-Once connected to the server, navigate to the food-ordering-app directory:
-Copy the code:
-cd ~/food-ordering-app/food-ordering-app1
+****
 
-3. Start the Server
-To start the server, run the following command:
-Copy the code:
-node server.js
+### Features
+- **React Frontend:** A responsive and user-friendly interface for ordering food.
+- **AWS Backend:** Uses AWS services like EC2, DynamoDB for data storage, and S3 for storing static assets.
+- **Order Management:** Users can create, update, and delete food orders in real-time.
+- **DynamoDB:** A NoSQL database for storing food items, orders, and customer information.
 
-You should see the message Server running at http://localhost:3000 indicating the server is running successfully.
-API Endpoints
-You can interact with the server using the following curl commands:
-1. POST: Create a New Order
-Create a new order with orderId, items, and total:
-Copy the code:
-curl -X POST http://3.142.74.220:3000/order \
--H "Content-Type: application/json" \
--d '{"orderId": "001", "items": ["Burger", "Fries"], "total": 15.99}'
+****
 
-2. GET: Retrieve an Order by ID
-Get an order using its orderId:
-Copy the code:
-curl -X GET http://3.142.74.220:3000/order/001
+### Installation
 
-3. PUT: Update an Entire Order
-Update an existing order's details:
-Copy the code:
-curl -X PUT http://3.142.74.220:3000/order/001 \
--H "Content-Type: application/json" \
--d '{"items": ["Pizza", "Coke"], "total": 19.99}'
+To get started with the project, follow the steps below.
 
-4. PATCH: Modify a Specific Field of an Order
-Update a specific field (e.g., total) in the order:
-Copy the code:
-curl -X PATCH http://3.142.74.220:3000/order/001 \
--H "Content-Type: application/json" \
--d '{"total": 20.99}'
+****
+
+#### Backend Setup
+
+1. **Clone the repository**:
+    ```bash
+    git clone https://github.com/kwakuduah12/final-fullstack-foodapp.git
+    ```
+    This command will copy the entire project to your local machine.
+
+****
+
+2. **Navigate to the project directory**:
+    ```bash
+    cd final-fullstack-foodapp
+    ```
+    Now, you are in the project folder.
+
+****
+
+3. **Start the EC2 instance (if using AWS)**:
+   Ensure your EC2 instance is up and running. Use the following command in your AWS console or terminal to start the instance:
+    ```bash
+    aws ec2 start-instances --instance-ids <your-instance-id>
+    ```
+    Replace `<your-instance-id>` with your actual EC2 instance ID.
+
+****
+
+4. **Connect to EC2 using SSH**:
+    ```bash
+    ssh -i <path-to-your-key-pair> ubuntu@<your-ec2-public-ip>
+    ```
+    Replace `<path-to-your-key-pair>` with the path to your SSH key, and `<your-ec2-public-ip>` with the public IP address of your EC2 instance.
+
+****
+
+5. **Install necessary dependencies on the server**:
+    ```bash
+    sudo apt-get update
+    sudo apt-get install nodejs npm
+    ```
+    This will install Node.js and npm, which are necessary to run the backend server.
+
+****
+
+6. **Install project dependencies**:
+    Once you're inside the project directory, run:
+    ```bash
+    npm install
+    ```
+    This will install all the Node.js dependencies specified in the `package.json` file.
+
+****
+
+7. **Run the server**:
+    After the installation is complete, you can start the backend server:
+    ```bash
+    npm start
+    ```
+    The server will now be running and listening for requests.
+
+****
+
+#### Frontend Setup
+
+1. **Navigate to the frontend directory**:
+    ```bash
+    cd frontend
+    ```
+    Enter the frontend folder where the React app is located.
+
+****
+
+2. **Install frontend dependencies**:
+    ```bash
+    npm install
+    ```
+    This will install all the React dependencies for the frontend application.
+
+****
+
+3. **Start the frontend application**:
+    ```bash
+    npm start
+    ```
+    The frontend React application will now be running on `http://localhost:3000`.
+
+****
+
+### AWS Setup
+
+1. **DynamoDB Table Creation**:
+   You need to create a DynamoDB table to store the order data. You can create the table manually via the AWS Console or run the following command using AWS CLI:
+    ```bash
+    aws dynamodb create-table \
+        --table-name Orders \
+        --attribute-definitions \
+            AttributeName=OrderId,AttributeType=S \
+        --key-schema AttributeName=OrderId,KeyType=HASH \
+        --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
+    ```
+    This command creates a table called **Orders** with a primary key `OrderId`.
+
+****
+
+### Environment Variables
+
+You need to configure environment variables for AWS keys and other project settings. Create an `.env` file in the root of your project and add the following:
+
+```bash
+AWS_ACCESS_KEY_ID=<your-aws-access-key>
+AWS_SECRET_ACCESS_KEY=<your-aws-secret-key>
+DYNAMODB_TABLE_NAME=Orders
+REGION=us-east-2
