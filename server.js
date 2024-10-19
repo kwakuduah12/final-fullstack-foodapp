@@ -1,9 +1,16 @@
 const express = require('express');
 const AWS = require('aws-sdk');
 
+// Autehtication
+const { authenticateToken } = require('./authentication'); // Import JWT authentication middleware
+const authRoutes = require('./authentication').router;
+
 // Initialize Express
 const app = express();
 app.use(express.json());
+
+// Use the authentication routes
+app.use('/auth', authRoutes);
 
 // Initialize DynamoDB
 const dynamoDB = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
@@ -114,7 +121,13 @@ app.patch('/order/:orderId', (req, res) => {
     });
 });
 
-// Start the server
-app.listen(3000, () => {
-    console.log('Server running at http://localhost:3000');
+// Start the server old code 
+//app.listen(3000, () => {
+  //  console.log('Server running at http://localhost:3000');
+//});
+
+// Start server port 
+const PORT = 3000;
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
 });
