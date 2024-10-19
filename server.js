@@ -8,6 +8,7 @@ const app = express();
 app.use(cors()); // Enable CORS
 app.use(express.json()); // Parse incoming requests
 
+
 // Use the authentication routes
 app.use('/auth', authRoutes);
 
