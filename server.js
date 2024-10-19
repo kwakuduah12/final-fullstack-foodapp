@@ -12,6 +12,12 @@ app.use(express.json());
 // Use the authentication routes
 app.use('/auth', authRoutes);
 
+// CORS
+const cors = require('cors');
+app.use(cors());
+
+
+
 // Initialize DynamoDB
 const dynamoDB = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
 const tableName = 'FoodOrders';
