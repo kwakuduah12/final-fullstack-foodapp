@@ -1,43 +1,28 @@
 const express = require('express');
 const AWS = require('aws-sdk');
 const cors = require('cors');
-
-// Autehtication
-//const { authenticateToken } = require('./authentication'); // Import JWT authentication middleware
-//const authRoutes = require('./authentication').router;
+const authRoutes = require('./authentication');
 
 // Initialize Express
 const app = express();
-app.use(express.json());
+app.use(cors()); // Enable CORS
+app.use(express.json()); // Parse incoming requests
 
 // Use the authentication routes
-//app.use('/auth', authRoutes);
-
-// Authentication retry
-const authRoutes = require('./authentication').router;
 app.use('/auth', authRoutes);
-
-
-// CORS
-const cors = require('cors');
-app.use(cors());
-
-// CORS 2
-app.use(cors()); // Enable CORS
-app.use(express.json());
-
-
 
 // Initialize DynamoDB
 const dynamoDB = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
-const tableName = 'FoodOrders';
+const ordersTable = 'FoodOrders'; // Orders table
+const usersTable = 'Users'; // Users table
+
 
 // POST: Create a new order
 app.post('/order', (req, res) => {
     const { orderId, items, total } = req.body;
 
     const params = {
-        TableName: tableName,
+        TableName: ordersTable,
         Item: {
             orderId: orderId,
             items: items,
@@ -59,7 +44,7 @@ app.get('/order/:orderId', (req, res) => {
     const { orderId } = req.params;
 
     const params = {
-        TableName: tableName,
+        TableName: ordersTable,
         Key: {
             orderId: orderId
         }
@@ -82,7 +67,7 @@ app.put('/order/:orderId', (req, res) => {
     const { items, total } = req.body;
 
     const params = {
-        TableName: tableName,
+        TableName: ordersTable,
         Item: {
             orderId: orderId,
             items: items,
@@ -121,7 +106,7 @@ app.patch('/order/:orderId', (req, res) => {
     updateExpression = updateExpression.slice(0, -1);
 
     const params = {
-        TableName: tableName,
+        TableName: ordersTable,
         Key: { orderId: orderId },
         UpdateExpression: updateExpression,
         ExpressionAttributeValues: expressionAttributeValues,

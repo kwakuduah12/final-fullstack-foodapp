@@ -1,47 +1,49 @@
-// database.js
-const AWS = require('aws-sdk');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const express = require('express');
+const UserDatabase = require('./database'); // Import UserDatabase class
+const { body, validationResult } = require('express-validator');
 
-// Initialize DynamoDB
-const dynamoDB = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
-const usersTable = 'Users'; // Ensure your DynamoDB table matches this name
+const router = express.Router();
 
-// JWT Secret Key (replace with your own secure key)
-const JWT_SECRET = 'your_jwt_secret_key'; 
+// Sign-up Route
+router.post('/signup',
+    body('email').isEmail().withMessage('Enter a valid email'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
 
-class UserDatabase {
-    static async createUser({ email, password }) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const { email, password } = req.body;
 
-        const params = {
-            TableName: usersTable,
-            Item: {
-                email, // Partition key
-                password: hashedPassword, // Store the hashed password
-            },
-        };
-
-        return dynamoDB.put(params).promise(); // Returns a promise
+        try {
+            await UserDatabase.createUser({ email, password });
+            res.status(201).json({ message: 'User registered successfully' });
+        } catch (error) {
+            res.status(500).json({ error: 'Error registering user', details: error });
+        }
     }
+);
 
-    static async findUserByEmail(email) {
-        const params = {
-            TableName: usersTable,
-            Key: { email }, // Partition key must match
-        };
+// Login Route
+router.post('/login',
+    body('email').isEmail().withMessage('Enter a valid email'),
+    body('password').exists().withMessage('Password is required'),
+    async (req, res) => {
+        const { email, password } = req.body;
 
-        const result = await dynamoDB.get(params).promise();
-        return result.Item;
+        try {
+            const user = await UserDatabase.findUserByEmail(email);
+            if (!user || !(await bcrypt.compare(password, user.password))) {
+                return res.status(400).json({ error: 'Invalid email or password' });
+            }
+
+            const token = UserDatabase.generateToken(user);
+            res.status(200).json({ token });
+        } catch (error) {
+            res.status(500).json({ error: 'Error logging in', details: error });
+        }
     }
+);
 
-    static generateToken(user) {
-        return jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-    }
-
-    static verifyToken(token) {
-        return jwt.verify(token, JWT_SECRET);
-    }
-}
-
-module.exports = UserDatabase;
+module.exports = router;
