@@ -1,20 +1,30 @@
 const express = require('express');
 const AWS = require('aws-sdk');
+const cors = require('cors');
 
 // Autehtication
-const { authenticateToken } = require('./authentication'); // Import JWT authentication middleware
-const authRoutes = require('./authentication').router;
+//const { authenticateToken } = require('./authentication'); // Import JWT authentication middleware
+//const authRoutes = require('./authentication').router;
 
 // Initialize Express
 const app = express();
 app.use(express.json());
 
 // Use the authentication routes
+//app.use('/auth', authRoutes);
+
+// Authentication retry
+const authRoutes = require('./authentication').router;
 app.use('/auth', authRoutes);
+
 
 // CORS
 const cors = require('cors');
 app.use(cors());
+
+// CORS 2
+app.use(cors()); // Enable CORS
+app.use(express.json());
 
 
 
