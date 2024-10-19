@@ -139,7 +139,6 @@ AWS_ACCESS_KEY_ID=<your-aws-access-key>
 AWS_SECRET_ACCESS_KEY=<your-aws-secret-key>
 DYNAMODB_TABLE_NAME=Orders
 <<<<<<< HEAD
-REGION=us-east-2
 =======
 REGION=us-east-2
 >>>>>>> 62f2b143908b8d4b8e8805fa0b78f36f7f8f0025
