@@ -74,11 +74,17 @@ To get started with the project, follow the steps below.
 7. **Run the server**:
     After the installation is complete, you can start the backend server:
     ```bash
+<<<<<<< HEAD
     node server.js
     ```
     The server will now be running and listening for requests.
     Should see Server running at http://localhost:3000
 
+=======
+    npm start
+    ```
+    The server will now be running and listening for requests.
+>>>>>>> 62f2b143908b8d4b8e8805fa0b78f36f7f8f0025
 
 ****
 
@@ -132,4 +138,8 @@ You need to configure environment variables for AWS keys and other project setti
 AWS_ACCESS_KEY_ID=<your-aws-access-key>
 AWS_SECRET_ACCESS_KEY=<your-aws-secret-key>
 DYNAMODB_TABLE_NAME=Orders
+<<<<<<< HEAD
 REGION=us-east-2
+=======
+REGION=us-east-2
+>>>>>>> 62f2b143908b8d4b8e8805fa0b78f36f7f8f0025
