@@ -122,6 +122,48 @@ app.patch('/order/:orderId', (req, res) => {
     });
 });
 
+// POST: Create a new user
+app.post('/user', (req, res) => {
+    const { email, username, password } = req.body;
+
+    const params = {
+        TableName: usersTable,
+        Item: {
+            email, // Partition key
+            username,
+            password,
+        },
+    };
+
+    dynamoDB.put(params, (err) => {
+        if (err) {
+            res.status(500).json({ error: 'Error creating user', details: err });
+        } else {
+            res.status(201).json({ message: 'User created successfully' });
+        }
+    });
+});
+
+// GET: Retrieve user by email
+app.get('/user/:email', (req, res) => {
+    const { email } = req.params;
+
+    const params = {
+        TableName: usersTable,
+        Key: { email },
+    };
+
+    dynamoDB.get(params, (err, data) => {
+        if (err) {
+            res.status(500).json({ error: 'Error fetching user', details: err });
+        } else if (!data.Item) {
+            res.status(404).json({ error: 'User not found' });
+        } else {
+            res.status(200).json({ message: 'User fetched successfully', data: data.Item });
+        }
+    });
+});
+
 // Start the server old code 
 //app.listen(3000, () => {
   //  console.log('Server running at http://localhost:3000');
