@@ -1,7 +1,8 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const UserDatabase = require('./database'); // Import UserDatabase
+const UserDatabase = require('./database');
 const { body, validationResult } = require('express-validator');
+
 const router = express.Router();
 
 // Sign-up Route
@@ -25,7 +26,7 @@ router.post('/signup',
             await UserDatabase.createUser({ email, password });
             res.status(201).json({ message: 'User registered successfully' });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Error registering user', details: error.message });
         }
     }
 );
@@ -43,15 +44,15 @@ router.post('/login',
                 return res.status(400).json({ error: 'Invalid email or password' });
             }
 
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-            if (!isPasswordValid) {
+            const isPasswordMatch = await bcrypt.compare(password, user.password);
+            if (!isPasswordMatch) {
                 return res.status(400).json({ error: 'Invalid email or password' });
             }
 
             const token = UserDatabase.generateToken(user);
             res.status(200).json({ token });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Error logging in', details: error.message });
         }
     }
 );
