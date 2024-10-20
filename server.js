@@ -1,44 +1,39 @@
-// server.js
 const express = require('express');
 const AWS = require('aws-sdk');
 const cors = require('cors');
-const authRoutes = require('./authentication');
+const authRoutes = require('./authentication'); // Correct route import
 
-// Initialize Express
 const app = express();
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse incoming requests
+app.use(cors());
+app.use(express.json());
 
-// Use the authentication routes
+// Ensure authentication routes are mounted
 app.use('/auth', authRoutes);
 
 // Initialize DynamoDB
 const dynamoDB = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
-const ordersTable = 'FoodOrders'; // Orders table
-const usersTable = 'Users'; // Users table
+
+const ordersTable = 'FoodOrders';
+const usersTable = 'Users';
+
 
 // POST: Create a new order
 app.post('/order', (req, res) => {
     const { orderId, items, total } = req.body;
-
-    if (!orderId || !items || !total) {
-        return res.status(400).json({ error: 'Missing required fields: orderId, items, total' });
-    }
-
     const params = {
         TableName: ordersTable,
         Item: {
-            orderId,
-            items,
-            total
+            orderId: orderId,
+            items: items,
+            total: total
         }
     };
 
-    dynamoDB.put(params, (err) => {
+    dynamoDB.put(params, (err, data) => {
         if (err) {
-            res.status(500).json({ error: 'Error creating order', details: err.message });
+            res.status(500).json({ error: 'Error creating order', details: err });
         } else {
-            res.status(201).json({ message: 'Order created successfully' });
+            res.status(201).json({ message: 'Order created successfully', data: data });
         }
     });
 });
@@ -49,12 +44,14 @@ app.get('/order/:orderId', (req, res) => {
 
     const params = {
         TableName: ordersTable,
-        Key: { orderId }
+        Key: {
+            orderId: orderId
+        }
     };
 
     dynamoDB.get(params, (err, data) => {
         if (err) {
-            res.status(500).json({ error: 'Error fetching order', details: err.message });
+            res.status(500).json({ error: 'Error fetching order', details: err });
         } else if (!data.Item) {
             res.status(404).json({ error: 'Order not found' });
         } else {
@@ -68,24 +65,20 @@ app.put('/order/:orderId', (req, res) => {
     const { orderId } = req.params;
     const { items, total } = req.body;
 
-    if (!items || !total) {
-        return res.status(400).json({ error: 'Missing required fields: items, total' });
-    }
-
     const params = {
         TableName: ordersTable,
         Item: {
-            orderId,
-            items,
-            total
+            orderId: orderId,
+            items: items,
+            total: total
         }
     };
 
-    dynamoDB.put(params, (err) => {
+    dynamoDB.put(params, (err, data) => {
         if (err) {
-            res.status(500).json({ error: 'Error replacing order', details: err.message });
+            res.status(500).json({ error: 'Error replacing order', details: err });
         } else {
-            res.status(200).json({ message: 'Order replaced successfully' });
+            res.status(200).json({ message: 'Order replaced successfully', data: data });
         }
     });
 });
@@ -108,16 +101,12 @@ app.patch('/order/:orderId', (req, res) => {
         expressionAttributeValues[':total'] = total;
     }
 
-    if (updateExpression === 'set') {
-        return res.status(400).json({ error: 'No fields to update' });
-    }
-
     // Remove the last comma in updateExpression
     updateExpression = updateExpression.slice(0, -1);
 
     const params = {
         TableName: ordersTable,
-        Key: { orderId },
+        Key: { orderId: orderId },
         UpdateExpression: updateExpression,
         ExpressionAttributeValues: expressionAttributeValues,
         ReturnValues: 'UPDATED_NEW'
@@ -125,7 +114,7 @@ app.patch('/order/:orderId', (req, res) => {
 
     dynamoDB.update(params, (err, data) => {
         if (err) {
-            res.status(500).json({ error: 'Error updating order', details: err.message });
+            res.status(500).json({ error: 'Error updating order', details: err });
         } else {
             res.status(200).json({ message: 'Order updated successfully', data: data.Attributes });
         }
@@ -136,14 +125,10 @@ app.patch('/order/:orderId', (req, res) => {
 app.post('/user', (req, res) => {
     const { email, username, password } = req.body;
 
-    if (!email || !username || !password) {
-        return res.status(400).json({ error: 'Missing required fields: email, username, password' });
-    }
-
     const params = {
         TableName: usersTable,
         Item: {
-            email,
+            email, // Partition key
             username,
             password,
         },
@@ -151,7 +136,7 @@ app.post('/user', (req, res) => {
 
     dynamoDB.put(params, (err) => {
         if (err) {
-            res.status(500).json({ error: 'Error creating user', details: err.message });
+            res.status(500).json({ error: 'Error creating user', details: err });
         } else {
             res.status(201).json({ message: 'User created successfully' });
         }
@@ -169,7 +154,7 @@ app.get('/user/:email', (req, res) => {
 
     dynamoDB.get(params, (err, data) => {
         if (err) {
-            res.status(500).json({ error: 'Error fetching user', details: err.message });
+            res.status(500).json({ error: 'Error fetching user', details: err });
         } else if (!data.Item) {
             res.status(404).json({ error: 'User not found' });
         } else {
@@ -178,9 +163,8 @@ app.get('/user/:email', (req, res) => {
     });
 });
 
-// Start server
-const PORT = 3000;
-app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
-});
+// Start the server old code 
+//app.listen(3000, () => {
+  //  console.log('Server running at http://localhost:3000');
+//});
 
