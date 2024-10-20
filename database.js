@@ -1,10 +1,11 @@
+// database.js
 const AWS = require('aws-sdk');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 // Initialize DynamoDB
 const dynamoDB = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
-const usersTable = 'Users'; // Ensure this matches exactly
+const usersTable = 'Users';
 
 // JWT Secret Key
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
@@ -16,8 +17,8 @@ class UserDatabase {
             const params = {
                 TableName: usersTable,
                 Item: {
-                    email, // Partition key
-                    password: hashedPassword, // Store the hashed password
+                    email,
+                    password: hashedPassword,
                 },
             };
             await dynamoDB.put(params).promise();
@@ -50,3 +51,4 @@ class UserDatabase {
 }
 
 module.exports = UserDatabase;
+
