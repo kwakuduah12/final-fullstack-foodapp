@@ -1,15 +1,13 @@
 package com.example.homedasher_prod
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,7 +17,6 @@ import com.example.homedasher_prod.ui.theme.HomeDasherProdTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             HomeDasherProdTheme {
                 val navController = rememberNavController()
@@ -36,8 +33,18 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NavigationComponent(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController, startDestination = "login", modifier = modifier) {
+    NavHost(navController, startDestination = "register", modifier = modifier) {
+        composable("home") { HomeScreen() }
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    HomeDasherProdTheme {
+        HomeScreen()
+    }
+}
+

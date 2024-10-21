@@ -1,6 +1,7 @@
 package com.example.homedasher_prod
 
 import androidx.compose.foundation.Image
+import java.net.NetworkInterface
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -54,8 +55,6 @@ fun LoginScreen(navController: NavHostController? = null, modifier: Modifier = M
                     .fillMaxWidth()
                     .height(270.dp)
             )
-
-            //Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "HomeDasher",

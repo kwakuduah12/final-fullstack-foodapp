@@ -116,7 +116,7 @@ fun RegisterScreen(navController: NavHostController? = null, modifier: Modifier 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { },
+            onClick = { /* Handle registration logic */ },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5))
         ) {

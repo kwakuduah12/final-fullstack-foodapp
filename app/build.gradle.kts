@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+
+    kotlin("plugin.serialization") version "1.8.10"
+
 }
 
 android {
@@ -52,9 +55,17 @@ android {
 dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     val nav_version = "2.8.2"
-
+    implementation("io.ktor:ktor-client-core:2.3.2")
+    implementation("io.ktor:ktor-client-cio:2.3.2")
+    implementation("io.ktor:ktor-client-json:2.3.2")
+    implementation("io.ktor:ktor-client-serialization:2.3.2")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.2")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("androidx.navigation:navigation-compose:$nav_version")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation("androidx.compose.material3:material3:1.0.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.0.0")
     // Jetpack Compose integration
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
