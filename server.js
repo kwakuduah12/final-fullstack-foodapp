@@ -37,6 +37,29 @@ app.post('/order', async (req, res) => {
     }
 });
 
+// POST: Create a new user
+app.post('/user', async (req, res) => {
+    const { userId, name, email, age } = req.body;
+
+    const params = {
+        TableName: usersTable,
+        Item: {
+            userId,
+            name,
+            email,
+            age,
+        }
+    };
+
+    try {
+        await dynamoDB.put(params).promise();
+        res.status(201).json({ message: 'User created successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error creating user', details: error });
+    }
+});
+
+
 // Start the server
 const PORT = 3000;
 app.listen(PORT, () => {

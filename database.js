@@ -3,34 +3,51 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const dynamoDB = new AWS.DynamoDB.DocumentClient({ region: 'us-east-2' });
-const usersTable = 'Users';
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
+const usersTable = 'Users'; // DynamoDB Users table
+//const JWT_SECRET = 'your_jwt_secret'; // Change to a secure secret!
+const crypto = require('crypto');
+const JWT_SECRET = crypto.randomBytes(32).toString('hex');
+console.log(JWT_SECRET);
+
 
 class UserDatabase {
-    static async createUser({ email, password }) {
-        const hashedPassword = await bcrypt.hash(password, 10);
+    static async createUser(user) {
+        const hashedPassword = await bcrypt.hash(user.password, 10);
         const params = {
             TableName: usersTable,
             Item: {
-                email,
-                password: hashedPassword
-            }
+                email: user.email,
+                username: user.username,
+                password: hashedPassword,
+            },
         };
-        await dynamoDB.put(params).promise();
+
+        return new Promise((resolve, reject) => {
+            dynamoDB.put(params, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
     }
 
     static async findUserByEmail(email) {
         const params = {
             TableName: usersTable,
-            Key: { email }
+            Key: { email },
         };
-        const result = await dynamoDB.get(params).promise();
-        if (!result.Item) throw new Error('User not found');
-        return result.Item;
+
+        return new Promise((resolve, reject) => {
+            dynamoDB.get(params, (err, data) => {
+                if (err) reject(err);
+                else resolve(data.Item);
+            });
+        });
     }
 
     static generateToken(user) {
-        return jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+        return jwt.sign({ email: user.email, username: user.username }, JWT_SECRET, {
+            expiresIn: '1h',
+        });
     }
 
     static verifyToken(token) {
