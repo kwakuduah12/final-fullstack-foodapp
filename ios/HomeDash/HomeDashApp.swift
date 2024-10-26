@@ -9,10 +9,15 @@ import SwiftUI
 
 @main
 struct HomeDashApp: App {
+    @AppStorage("isAuthenticated") var isAuthenticated: Bool = false
+
     var body: some Scene {
         WindowGroup {
-            AuthView()
-//            ContentView()
+            if isAuthenticated {
+                ContentView()
+            } else {
+                AuthView()
+            }
         }
     }
 }

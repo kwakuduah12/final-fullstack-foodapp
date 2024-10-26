@@ -1,19 +1,43 @@
 import SwiftUI
 import CoreLocation
+import MapKit
 
+struct Promotion: Identifiable {
+    let id = UUID()
+    let imageName: String
+    let title: String
+    let description: String
+}
+
+struct Notification: Identifiable {
+    let id = UUID()
+    let title: String
+    let description: String
+    let imageName: String
+}
+
+// ContentView that includes location, promotions, and a map feature
 struct ContentView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var searchText = ""
+    @State private var showMap = false
+    @State private var showNotifications = false
+    @State private var region = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), // Default to San Francisco
+        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+    )
+    
+    let promotions = [
+        Promotion(imageName: "pepperoni", title: "20% Off on Pizza", description: "Order any pizza and get 20% off."),
+        Promotion(imageName: "burger-drink", title: "Free Drink with Burger", description: "Get a free drink with every burger."),
+        Promotion(imageName: "taco-tuesday", title: "Taco Tuesday Special", description: "Buy 2 Tacos, get 1 free!")
+    ]
     
     var body: some View {
         VStack(alignment: .leading) {
-            // Background color for entire view
-            Color.gray.opacity(0.1)
-                .ignoresSafeArea()
-            
             // Top Row with Location, Notification, and Cart
             HStack {
-                // 1a. Current Location
+                // Current Location
                 VStack(alignment: .leading) {
                     Text("Current Location")
                         .font(.subheadline)
@@ -21,39 +45,39 @@ struct ContentView: View {
                     Text(locationManager.city ?? "Locating...")
                         .font(.headline)
                         .fontWeight(.bold)
-                        .foregroundColor(Color.blue) // Changed text color to blue
+                        .foregroundColor(Color.blue)
                 }
                 Spacer()
                 
-                // 1b. Notification Bell
+                // Notification Bell
                 Button(action: {
-                    // Navigate to notifications page
-                    print("Notification Bell Tapped")
+                    showNotifications = true // Show notifications when tapped
                 }) {
                     Image(systemName: "bell.fill")
                         .font(.title)
                         .foregroundColor(.white)
                         .padding()
-                        .background(Circle().fill(Color.orange)) // Circle with orange background
+                        .background(Circle().fill(Color.orange))
                 }
                 .padding(.horizontal)
+                .sheet(isPresented: $showNotifications) {
+                    NotificationView() // Present NotificationView when tapped
+                }
                 
-                // 1c. Shopping Cart
+                // Shopping Cart
                 Button(action: {
-                    // Navigate to checkout page
                     print("Shopping Cart Tapped")
                 }) {
                     Image(systemName: "cart.fill")
                         .font(.title)
                         .foregroundColor(.white)
                         .padding()
-                        .background(Circle().fill(Color.green)) // Circle with green background
+                        .background(Circle().fill(Color.green))
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 10)
             
-            // 2.a Search Bar and 2.b Map Icon
+            // Search Bar and Map Icon
             HStack {
                 // Search bar
                 HStack {
@@ -65,20 +89,38 @@ struct ContentView: View {
                 
                 // Map Icon
                 Button(action: {
-                    // Action to navigate to map with vendors
-                    print("Map Icon Tapped")
+                    showMap.toggle()
                 }) {
                     Image(systemName: "map.fill")
                         .font(.title2)
                         .foregroundColor(.white)
                         .padding()
-                        .background(Circle().fill(Color.blue)) // Circle with blue background
+                        .background(Circle().fill(Color.blue))
                 }
                 .padding(.trailing)
+                .sheet(isPresented: $showMap) {
+                    MapView(region: $region) // Show the map when the button is tapped
+                }
             }
             .padding(.top, 10)
             
-            // 3.a Popular Foods by Country/Region
+            // Promotions Section
+            Text("Promotions You'll Love")
+                .font(.headline)
+                .padding(.leading, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 16) {
+                    ForEach(promotions) { promotion in
+                        PromotionView(promotion: promotion)
+                    }
+                }
+                .padding(.horizontal, 16)
+            }
+            .padding(.top, 10)
+            
+            // Popular Foods by Country/Region
             Text("Popular Foods by Country/Region")
                 .font(.headline)
                 .fontWeight(.semibold)
@@ -87,15 +129,15 @@ struct ContentView: View {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 20) {
-                    FoodCategoryView(name: "Pizza", imageName: "pizza")
-                    FoodCategoryView(name: "Burgers", imageName: "burger")
-                    FoodCategoryView(name: "Sushi", imageName: "sushi")
-                    // Add more food categories by country/region
+                    FoodCategoryView(name: "Tacos", imageName: "tacos")
+                    FoodCategoryView(name: "Jollof", imageName: "jollof")
+                    FoodCategoryView(name: "Italian", imageName: "italian")
+                    FoodCategoryView(name: "Asian", imageName: "asian")
                 }
             }
             .padding(.horizontal)
             
-            // 3.b Popular Tags for Sorting
+            // Sort by Tags
             Text("Sort by")
                 .font(.headline)
                 .fontWeight(.semibold)
@@ -108,14 +150,78 @@ struct ContentView: View {
                     SortTagView(name: "Pickup")
                     SortTagView(name: "Deals")
                     SortTagView(name: "Ratings")
-                    // Add more sort tags as needed
                 }
             }
             .padding(.horizontal)
         }
         .padding()
         .background(Color.gray.opacity(0.1))
- // Background color for the whole view
+    }
+}
+
+// NotificationView to display a list of notifications
+struct NotificationView: View {
+    let notifications = [
+        Notification(title: "Restaurant Recommendations", description: "We recommend trying Bella Italia near you!", imageName: "italian"),
+        Notification(title: "Order Update", description: "Your order is being dropped off in 10 minutes.", imageName: "burger-drink"),
+        Notification(title: "Familiar Favorites", description: "Your favorite sushi place is offering 10% off today!", imageName: "sushi"),
+        Notification(title: "New Restaurant Added", description: "Check out Taco Fiesta, now available in your area.", imageName: "tacos"),
+        Notification(title: "Weekly Most Ordered", description: "Pizza is the top choice this week. Order now!", imageName: "pepperoni")
+    ]
+    
+    var body: some View {
+        NavigationView {
+            List(notifications) { notification in
+                HStack {
+                    Image(notification.imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 50, height: 50)
+                        .cornerRadius(10)
+                        .padding(.trailing, 10)
+                    
+                    VStack(alignment: .leading) {
+                        Text(notification.title)
+                            .font(.headline)
+                        Text(notification.description)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(.vertical, 5)
+            }
+            .navigationTitle("Notifications")
+        }
+    }
+}
+
+// Custom view for promotions
+struct PromotionView: View {
+    let promotion: Promotion
+    
+    var body: some View {
+        VStack {
+            Image(promotion.imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 150, height: 100)
+                .cornerRadius(10)
+            
+            Text(promotion.title)
+                .font(.headline)
+                .padding(.top, 5)
+                .multilineTextAlignment(.center)
+            
+            Text(promotion.description)
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 5)
+        }
+        .frame(width: 150)
+        .background(Color.white)
+        .cornerRadius(10)
+        .shadow(radius: 3)
     }
 }
 
@@ -130,16 +236,16 @@ struct FoodCategoryView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 100, height: 100)
-                .background(Circle().fill(Color.purple.opacity(0.2))) // Add a circle behind the image
+                .background(Circle().fill(Color.purple.opacity(0.2)))
             Text(name)
                 .font(.caption)
                 .fontWeight(.bold)
-                .foregroundColor(.purple) // Purple text color
+                .foregroundColor(.purple)
         }
         .frame(width: 120, height: 150)
-        .background(Color.white) // White background for the card
+        .background(Color.white)
         .cornerRadius(10)
-        .shadow(radius: 5) // Add shadow for depth
+        .shadow(radius: 5)
     }
 }
 
@@ -152,14 +258,42 @@ struct SortTagView: View {
             .font(.subheadline)
             .padding(.horizontal, 15)
             .padding(.vertical, 10)
-            .background(Color.blue.opacity(0.2)) // Light blue background
-            .foregroundColor(.blue) // Blue text color
+            .background(Color.blue.opacity(0.2))
+            .foregroundColor(.blue)
             .cornerRadius(20)
             .shadow(radius: 3)
     }
 }
 
-// Location Manager to Get User's Location
+// MapView to display the user's location
+struct MapView: UIViewRepresentable {
+    @Binding var region: MKCoordinateRegion
+    
+    func makeUIView(context: Context) -> MKMapView {
+        let mapView = MKMapView()
+        mapView.delegate = context.coordinator
+        mapView.showsUserLocation = true
+        return mapView
+    }
+    
+    func updateUIView(_ uiView: MKMapView, context: Context) {
+        uiView.setRegion(region, animated: true)
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, MKMapViewDelegate {
+        var parent: MapView
+        
+        init(_ parent: MapView) {
+            self.parent = parent
+        }
+    }
+}
+
+// Location Manager to get user's location
 class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     
@@ -175,7 +309,6 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let location = locations.first else { return }
         
-        // Reverse geocoding to get the city name
         let geocoder = CLGeocoder()
         geocoder.reverseGeocodeLocation(location) { (placemarks, error) in
             if let placemark = placemarks?.first {
@@ -185,6 +318,7 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 }
 
+// Preview
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
