@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,6 +32,7 @@ import com.example.homedasher_prod.design.AuthOption
 fun LoginScreen(navController: NavHostController? = null, modifier: Modifier = Modifier) {
     val systemUiController = rememberSystemUiController()
     val backgroundColor = Color(0xFFE0F7FA)
+    val context = LocalContext.current
 
     SideEffect {
         systemUiController.setSystemBarsColor(
@@ -54,8 +56,6 @@ fun LoginScreen(navController: NavHostController? = null, modifier: Modifier = M
                     .fillMaxWidth()
                     .height(270.dp)
             )
-
-            //Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = "HomeDasher",
@@ -102,7 +102,9 @@ fun LoginScreen(navController: NavHostController? = null, modifier: Modifier = M
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { },
+            onClick = {
+                loginUser(email, password, context, navController!!)
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5))
         ) {
