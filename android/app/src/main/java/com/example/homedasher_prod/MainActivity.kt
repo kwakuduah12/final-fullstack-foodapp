@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NavigationComponent(navController: NavHostController, modifier: Modifier = Modifier) {
-    NavHost(navController, startDestination = "home", modifier = modifier) {
+    NavHost(navController, startDestination = "login", modifier = modifier) {
         composable("home") { HomeScreen() }
         composable("login") { LoginScreen(navController) }
         composable("register") { RegisterScreen(navController) }
