@@ -1,84 +1,70 @@
-# Fullstack Food App
+# Getting Started with Create React App
 
-## Project Overview
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-This is a collaborative fullstack food delivery application aimed at providing a seamless and convenient way for users to order food online. The project is divided into several parts: backend development, web application, Android application, and iOS application.
+## Available Scripts
 
-### Team Members and Roles:
-- **Backend Development**: 
-  - Responsible for handling API calls, database operations, and server-side logic.
-  - Tools: Postman, MongoDB.
-  - Team: Vincent Salihu, Hanjoline J
-  
-- **Web Application**: 
-  - Focused on creating the user interface for the web version using React JS and npm.
-  - Tools: React JS, npm.
-  - Team: Chellisa Johnson, Lawrencia Agbovi
-  
-- **Android Application**: 
-  - Developing the Android app using Kotlin.
-  - Tool: Kotlin.
-  - Team: Victor Akolo
+In the project directory, you can run:
 
-- **iOS Application**: 
-  - Developing the iOS app using Swift.
-  - Tool: Swift.
-  - Team: Philip De-Graft
+### `npm start`
 
-## Features
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-- **Backend**:
-  - CRUD operations for restaurant and menu management.
-  - Integration with MongoDB for storing data.
-  - API testing with Postman.
-  
-- **Web App**:
-  - A user-friendly interface for browsing and ordering food.
-  - Implemented using React JS.
-  - Frontend state management and dynamic rendering.
-  
-- **Android & iOS Apps**:
-  - Native mobile applications for Android and iOS platforms.
-  - Ability to browse menus, place orders, and track deliveries.
-  
-## Tech Stack
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-### Backend:
-- **Node.js**: Backend environment.
-- **Express.js**: Web framework for Node.js.
-- **MongoDB**: Database to store food, restaurant, and user data.
-- **Postman**: API testing tool.
+### `npm test`
 
-### Web Application:
-- **React JS**: Frontend library for building user interfaces.
-- **npm**: Package manager for JavaScript.
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### Mobile Applications:
-- **Kotlin**: Programming language for Android development.
-- **Swift**: Programming language for iOS development.
+### `npm run build`
 
-## Setup and Installation
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### Backend:
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/kwakuduah12/final-fullstack-foodapp.git
-2. Navigate to the backend folder and install dependencies:
-   ```bash
-   cd backend
-   npm install
-3. Start the server:
-   ```bash
-   npm run dev
-5. Ensure MongoDB is running and Postman is used for testing API calls.
-### Web App:
-1. Navigate
-```bash
-cd web
-npm install
-2. Run the web app:
-```bash
-npm start
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### `npm run eject`
 
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
