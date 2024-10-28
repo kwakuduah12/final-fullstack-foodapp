@@ -2,6 +2,7 @@ import SwiftUI
 import CoreLocation
 import MapKit
 
+
 struct Promotion: Identifiable {
     let id = UUID()
     let imageName: String
@@ -22,6 +23,11 @@ struct ContentView: View {
     @State private var searchText = ""
     @State private var showMap = false
     @State private var showNotifications = false
+    @State private var showCart = false
+    @State private var cartItems: [CartItem] = [
+        CartItem(name: "Pepperoni Pizza", price: 12.99, quantity: 1),
+        CartItem(name: "Burger", price: 9.99, quantity: 2)
+    ]
     @State private var region = MKCoordinateRegion(
         center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), // Default to San Francisco
         span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
@@ -34,131 +40,143 @@ struct ContentView: View {
     ]
     
     var body: some View {
-        VStack(alignment: .leading) {
-            // Top Row with Location, Notification, and Cart
-            HStack {
-                // Current Location
-                VStack(alignment: .leading) {
-                    Text("Current Location")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    Text(locationManager.city ?? "Locating...")
-                        .font(.headline)
-                        .fontWeight(.bold)
-                        .foregroundColor(Color.blue)
-                }
-                Spacer()
-                
-                // Notification Bell
-                Button(action: {
-                    showNotifications = true // Show notifications when tapped
-                }) {
-                    Image(systemName: "bell.fill")
-                        .font(.title)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Circle().fill(Color.orange))
-                }
-                .padding(.horizontal)
-                .sheet(isPresented: $showNotifications) {
-                    NotificationView() // Present NotificationView when tapped
-                }
-                
-                // Shopping Cart
-                Button(action: {
-                    print("Shopping Cart Tapped")
-                }) {
-                    Image(systemName: "cart.fill")
-                        .font(.title)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Circle().fill(Color.green))
-                }
-            }
-            .padding(.horizontal)
-            
-            // Search Bar and Map Icon
-            HStack {
-                // Search bar
+        NavigationView {
+            VStack(alignment: .leading) {
+                // Top Row with Location, Notification, and Cart
                 HStack {
-                    Image(systemName: "magnifyingglass")
-                    TextField("Search for restaurants or food...", text: $searchText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                }
-                .padding(.horizontal)
-                
-                // Map Icon
-                Button(action: {
-                    showMap.toggle()
-                }) {
-                    Image(systemName: "map.fill")
-                        .font(.title2)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Circle().fill(Color.blue))
-                }
-                .padding(.trailing)
-                .sheet(isPresented: $showMap) {
-                    MapView(region: $region) // Show the map when the button is tapped
-                }
-            }
-            .padding(.top, 10)
-            
-            // Promotions Section
-            Text("Promotions You'll Love")
-                .font(.headline)
-                .padding(.leading, 16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
-                    ForEach(promotions) { promotion in
-                        PromotionView(promotion: promotion)
+                    // Current Location
+                    VStack(alignment: .leading) {
+                        Text("Current Location")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        Text(locationManager.city ?? "Locating...")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(Color.blue)
+                    }
+                    Spacer()
+                    
+                    // Notification Bell
+                    Button(action: {
+                        showNotifications = true
+                    }) {
+                        Image(systemName: "bell.fill")
+                            .font(.title)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.orange))
+                    }
+                    .padding(.horizontal)
+                    .sheet(isPresented: $showNotifications) {
+                        NotificationView()
+                    }
+                    
+                    // Shopping Cart
+                    Button(action: {
+                        showCart = true
+                    }) {
+                        Image(systemName: "cart.fill")
+                            .font(.title)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.green))
+                    }
+                    .sheet(isPresented: $showCart) {
+                        CartView(cartItems: $cartItems)
                     }
                 }
-                .padding(.horizontal, 16)
-            }
-            .padding(.top, 10)
-            
-            // Popular Foods by Country/Region
-            Text("Popular Foods by Country/Region")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(.black)
-                .padding(.top)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 20) {
-                    FoodCategoryView(name: "Tacos", imageName: "tacos")
-                    FoodCategoryView(name: "Jollof", imageName: "jollof")
-                    FoodCategoryView(name: "Italian", imageName: "italian")
-                    FoodCategoryView(name: "Asian", imageName: "asian")
+                .padding(.horizontal)
+                
+                // Search Bar and Map Icon
+                HStack {
+                    // Search bar
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                        TextField("Search for restaurants or food...", text: $searchText)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                    }
+                    .padding(.horizontal)
+                    
+                    // Map Icon
+                    Button(action: {
+                        showMap.toggle()
+                    }) {
+                        Image(systemName: "map.fill")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(Circle().fill(Color.blue))
+                    }
+                    .padding(.trailing)
+                    .sheet(isPresented: $showMap) {
+                        MapView(region: $region)
+                    }
                 }
-            }
-            .padding(.horizontal)
-            
-            // Sort by Tags
-            Text("Sort by")
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(.black)
-                .padding(.top)
-            
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    SortTagView(name: "Price")
-                    SortTagView(name: "Pickup")
-                    SortTagView(name: "Deals")
-                    SortTagView(name: "Ratings")
+                .padding(.top, 10)
+                
+                // Promotions Section
+                Text("Promotions You'll Love")
+                    .font(.headline)
+                    .padding(.leading, 16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 16) {
+                        ForEach(promotions) { promotion in
+                            PromotionView(promotion: promotion)
+                        }
+                    }
+                    .padding(.horizontal, 16)
                 }
+                .padding(.top, 10)
+                
+                // Popular Foods by Country/Region
+                Text("Popular Foods by Country/Region")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.black)
+                    .padding(.top)
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        NavigationLink(destination: RestaurantListView(foodCategory: "Tacos")) {
+                            FoodCategoryView(name: "Tacos", imageName: "tacos")
+                        }
+                        NavigationLink(destination: RestaurantListView(foodCategory: "Jollof")) {
+                            FoodCategoryView(name: "Jollof", imageName: "jollof")
+                        }
+                        NavigationLink(destination: RestaurantListView(foodCategory: "Italian")) {
+                            FoodCategoryView(name: "Italian", imageName: "italian")
+                        }
+                        NavigationLink(destination: RestaurantListView(foodCategory: "Asian")) {
+                            FoodCategoryView(name: "Asian", imageName: "asian")
+                        }
+                    }
+                }
+                .padding(.horizontal)
+                
+                // Sort by Tags
+                Text("Sort by")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.black)
+                    .padding(.top)
+                
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        SortTagView(name: "Price")
+                        SortTagView(name: "Pickup")
+                        SortTagView(name: "Deals")
+                        SortTagView(name: "Ratings")
+                    }
+                }
+                .padding(.horizontal)
             }
-            .padding(.horizontal)
+            .padding()
+            .background(Color.gray.opacity(0.1))
         }
-        .padding()
-        .background(Color.gray.opacity(0.1))
     }
 }
-
 // NotificationView to display a list of notifications
 struct NotificationView: View {
     let notifications = [
@@ -168,7 +186,7 @@ struct NotificationView: View {
         Notification(title: "New Restaurant Added", description: "Check out Taco Fiesta, now available in your area.", imageName: "tacos"),
         Notification(title: "Weekly Most Ordered", description: "Pizza is the top choice this week. Order now!", imageName: "pepperoni")
     ]
-    
+
     var body: some View {
         NavigationView {
             List(notifications) { notification in
@@ -179,7 +197,7 @@ struct NotificationView: View {
                         .frame(width: 50, height: 50)
                         .cornerRadius(10)
                         .padding(.trailing, 10)
-                    
+
                     VStack(alignment: .leading) {
                         Text(notification.title)
                             .font(.headline)
@@ -192,6 +210,27 @@ struct NotificationView: View {
             }
             .navigationTitle("Notifications")
         }
+    }
+}
+
+// Restaurant List view for each food category
+struct RestaurantListView: View {
+    let foodCategory: String
+
+    let restaurants = [
+        "Bella Italia",
+        "Sushi House",
+        "Burger Palace",
+        "Pizza Corner"
+    ]
+
+    var body: some View {
+        List {
+            ForEach(restaurants, id: \.self) { restaurant in
+                Text(restaurant)
+            }
+        }
+        .navigationTitle("\(foodCategory) Restaurants")
     }
 }
 
@@ -229,7 +268,7 @@ struct PromotionView: View {
 struct FoodCategoryView: View {
     var name: String
     var imageName: String
-    
+
     var body: some View {
         VStack {
             Image(imageName)
@@ -252,7 +291,7 @@ struct FoodCategoryView: View {
 // Custom view for sort tags
 struct SortTagView: View {
     var name: String
-    
+
     var body: some View {
         Text(name)
             .font(.subheadline)
@@ -268,25 +307,25 @@ struct SortTagView: View {
 // MapView to display the user's location
 struct MapView: UIViewRepresentable {
     @Binding var region: MKCoordinateRegion
-    
+
     func makeUIView(context: Context) -> MKMapView {
         let mapView = MKMapView()
         mapView.delegate = context.coordinator
         mapView.showsUserLocation = true
         return mapView
     }
-    
+
     func updateUIView(_ uiView: MKMapView, context: Context) {
         uiView.setRegion(region, animated: true)
     }
-    
+
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-    
+
     class Coordinator: NSObject, MKMapViewDelegate {
         var parent: MapView
-        
+
         init(_ parent: MapView) {
             self.parent = parent
         }
@@ -318,9 +357,9 @@ class LocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     }
 }
 
-// Preview
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
+
