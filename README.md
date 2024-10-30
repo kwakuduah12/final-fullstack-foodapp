@@ -6,9 +6,7 @@ This project is a full-stack food ordering application that uses a **React.js** 
 
 ### Features
 - **React Frontend:** A responsive and user-friendly interface for ordering food.
-- **AWS Backend:** Uses AWS services like EC2, DynamoDB for data storage, and S3 for storing static assets.
 - **Order Management:** Users can create, update, and delete food orders in real-time.
-- **DynamoDB:** A NoSQL database for storing food items, orders, and customer information.
 
 ****
 
@@ -36,24 +34,7 @@ To get started with the project, follow the steps below.
 
 ****
 
-3. **Start the EC2 instance (if using AWS)**:
-   Ensure your EC2 instance is up and running. Use the following command in your AWS console or terminal to start the instance:
-    ```bash
-    aws ec2 start-instances --instance-ids <your-instance-id>
-    ```
-    Replace `<your-instance-id>` with your actual EC2 instance ID.
-
-****
-
-4. **Connect to EC2 using SSH**:
-    ```bash
-    ssh -i <path-to-your-key-pair> ubuntu@<your-ec2-public-ip>
-    ```
-    Replace `<path-to-your-key-pair>` with the path to your SSH key, and `<your-ec2-public-ip>` with the public IP address of your EC2 instance.
-
-****
-
-5. **Install necessary dependencies on the server**:
+3. **Install necessary dependencies on the server**:
     ```bash
     sudo apt-get update
     sudo apt-get install nodejs npm
@@ -62,29 +43,12 @@ To get started with the project, follow the steps below.
 
 ****
 
-6. **Install project dependencies**:
+4. **Install project dependencies**:
     Once you're inside the project directory, run:
     ```bash
     npm install
     ```
     This will install all the Node.js dependencies specified in the `package.json` file.
-
-****
-
-7. **Run the server**:
-    After the installation is complete, you can start the backend server:
-    ```bash
-<<<<<<< HEAD
-    node server.js
-    ```
-    The server will now be running and listening for requests.
-    Should see Server running at http://localhost:3000
-
-=======
-    npm start
-    ```
-    The server will now be running and listening for requests.
->>>>>>> 62f2b143908b8d4b8e8805fa0b78f36f7f8f0025
 
 ****
 
@@ -114,31 +78,5 @@ To get started with the project, follow the steps below.
 
 ****
 
-### AWS Setup
 
-1. **DynamoDB Table Creation**:
-   You need to create a DynamoDB table to store the order data. You can create the table manually via the AWS Console or run the following command using AWS CLI:
-    ```bash
-    aws dynamodb create-table \
-        --table-name Orders \
-        --attribute-definitions \
-            AttributeName=OrderId,AttributeType=S \
-        --key-schema AttributeName=OrderId,KeyType=HASH \
-        --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5
-    ```
-    This command creates a table called **Orders** with a primary key `OrderId`.
 
-****
-
-### Environment Variables
-
-You need to configure environment variables for AWS keys and other project settings. Create an `.env` file in the root of your project and add the following:
-
-```bash
-AWS_ACCESS_KEY_ID=<your-aws-access-key>
-AWS_SECRET_ACCESS_KEY=<your-aws-secret-key>
-DYNAMODB_TABLE_NAME=Orders
-<<<<<<< HEAD
-=======
-REGION=us-east-2
->>>>>>> 62f2b143908b8d4b8e8805fa0b78f36f7f8f0025
