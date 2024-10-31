@@ -1,24 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const Restaurant = require('../models/restaurant');
-const bcrypt = require('bcrypt');
 
 // Route to create a new restaurant
-router.post('/restaurant', (req, res) => {
+router.post('/', (req, res) => {
     const { name, description, rating } = req.body;
-    //const { name, location, phone_number, description, rating } = req.body;
 
     // Validate the input
     if (!name || !description || rating == null) {
-        //if (!name || !location || !phone_number || !description || rating == null) {
         return res.status(400).json({ message: 'All fields are required' });
     }
 
     // Create a new restaurant instance
     const newRestaurant = new Restaurant({
         name,
-        //location,
-        //phone_number,
         description,
         rating
     });
@@ -33,7 +28,7 @@ router.post('/restaurant', (req, res) => {
 });
 
 // Route to get all restaurants
-router.get('/restaurant', (req, res) => {
+router.get('/', (req, res) => {
     Restaurant.find()
         .then(restaurants => res.status(200).json({ data: restaurants }))
         .catch(error => {
