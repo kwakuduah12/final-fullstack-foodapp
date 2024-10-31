@@ -10,6 +10,7 @@ const uri = process.env.DB_URI;
 
 const app = express();
 const UserRoutes = require('./routes/userRoutes');
+const restaurantRoutes = require('./routes/restaurantRoutes');
 
 app.use(cors());
 
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 
 
 app.use('/user', UserRoutes);
+app.use('/restaurant', restaurantRoutes);
 const connectDB = async () => {
     try {
         await mongoose.connect(uri);
@@ -29,7 +31,6 @@ const connectDB = async () => {
     }
 }
 connectDB();
-
 
 
 app.get('/', function(req, res) {
