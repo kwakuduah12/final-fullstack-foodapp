@@ -11,7 +11,8 @@ import BecomeMerchant from './Components/BecomeMerchant';
 import UseMobileApp from './Components/UseMobileApp';
 import HomePage from './Components/HomePage';
 import './Styles/Home.css';
-
+import MerchantHome from './Components/MerchantHome';
+import Menu from './Components/Menu';
 
 const App = () => {
   const location = useLocation(); 
@@ -33,6 +34,8 @@ const App = () => {
         <Route path="/become-merchant" element={<BecomeMerchant />} />
         <Route path="/use-mobile-app" element={<UseMobileApp />} />
         <Route path="/home-page" element={<HomePage />} />
+        <Route path="/merchanthome" element={<MerchantHome />} />
+        <Route path="/menu" element={<Menu />} />
       </Routes>
     </div>
   );
