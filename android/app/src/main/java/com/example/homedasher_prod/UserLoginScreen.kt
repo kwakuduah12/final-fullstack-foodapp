@@ -67,6 +67,10 @@ fun LoginScreen(navController: NavHostController? = null, modifier: Modifier = M
 
         var email by remember { mutableStateOf("") }
         var password by remember { mutableStateOf("") }
+        var role by remember { mutableStateOf("User") }
+        var expanded by remember { mutableStateOf(false) }
+
+        val roles = listOf("User", "Merchant")
 
         Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedTextField(
@@ -97,13 +101,37 @@ fun LoginScreen(navController: NavHostController? = null, modifier: Modifier = M
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 singleLine = true
             )
+
+            Box(modifier = Modifier.fillMaxWidth().clickable { expanded = true }) {
+                OutlinedTextField(
+                    value = role,
+                    onValueChange = { },
+                    label = { Text("Role") },
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    roles.forEach { currentRole ->
+                        DropdownMenuItem(
+                            onClick = {
+                                role = currentRole
+                                expanded = false
+                            },
+                            text = { Text(text = currentRole) }
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                loginUser(email, password, context, navController!!)
+                loginUser(email, password, role, context, navController!!)
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3F51B5))
@@ -136,24 +164,37 @@ fun LoginScreen(navController: NavHostController? = null, modifier: Modifier = M
             )
         }
 
-        Row(
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+        Column(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Row {
+                Text(
+                    text = "Don't have an account? ",
+                    fontSize = 16.sp,
+                    color = Color(0xFF37474F)
+                )
+                Text(
+                    text = "Register",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable {
+                        navController?.navigate("register")
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text(
-                text = "Don't have an account? ",
-                fontSize = 16.sp,
-                color = Color(0xFF37474F)
-            )
-            Text(
-                text = "Register",
+                text = "Become a Merchant",
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable {
-                    navController?.navigate("register")
+                    navController?.navigate("merchantRegistration")
                 }
             )
         }
 
-        Spacer(modifier = Modifier.height(1.dp))
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
