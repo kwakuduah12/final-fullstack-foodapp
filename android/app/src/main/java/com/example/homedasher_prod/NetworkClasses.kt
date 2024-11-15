@@ -58,6 +58,7 @@ data class Merchant(
 
 @Serializable
 data class MerchantMenuItem(
+    val _id: String,
     @SerialName("merchant_id") val merchantId: String,
     @SerialName("item_name") val itemName: String,
     val description: String? = null,
@@ -73,23 +74,71 @@ data class MerchantMenuItem(
 data class MenuResponse(
     val data: List<MerchantMenuItem>
 )
+@Serializable
+data class CartResponse(
+    val message: String,
+    val data: CartData
+)
 
-data class Cart(
+@Serializable
+data class CartData(
+    val _id: String,
     val user_id: String,
     val items: List<CartItem>,
-    val total_price: Double = 0.0,
-    val created_at: String = "",
-    val updated_at: String = ""
+    val total_price: Double,
+    val created_at: String,
+    val updated_at: String,
+    val __v: Int
 )
 
+@Serializable
 data class CartItem(
-    val menu_item_id: String,
-    val quantity: Int = 1
+    @SerialName("menu_item_id") val menuItem: MenuItem? = null,
+    val quantity: Int,
+    val _id: String
 )
 
+@Serializable
+data class MenuItem(
+    val _id: String,
+    val merchant_id: String,
+    val item_name: String,
+    val description: String,
+    val price: Double,
+    val category: String,
+    val available: Boolean,
+    val created_at: String,
+    val updated_at: String,
+    val __v: Int
+)
+
+@Serializable
+data class AddToCartRequest(
+    val user_id: String,
+    val menu_item_id: String,
+    val quantity: Int
+)
 
 @Serializable
 data class LoginResponse(
     val message: String,
     val token: String
+)
+
+@Serializable
+data class OrderRequest(
+    val merchant_id: String,
+    val items: List<OrderItem>
+)
+
+@Serializable
+data class OrderItem(
+    val menu_item_id: String,
+    val quantity: Int
+)
+
+
+@Serializable
+data class RemoveItemRequest(
+    val menu_item_id: String
 )

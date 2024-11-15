@@ -24,7 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.navigation.NavController
 
 @Composable
-fun UserCategoryScreen(context: Context, storeType: String, navController: NavController) {
+fun UserCategoryScreen(context: Context, storeType: String, navController: NavController, userId: String) {
     var merchants by remember { mutableStateOf<List<Merchant>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -54,7 +54,7 @@ fun UserCategoryScreen(context: Context, storeType: String, navController: NavCo
             Column(modifier = Modifier.padding(16.dp)) {
                 merchants.forEach { merchant ->
                     MerchantCard(merchant) {
-                        navController.navigate("userMenu/${merchant.storeName}/${merchant._id}")
+                        navController.navigate("userMenu/${merchant.storeName}/${merchant._id}/$userId")
                     }
                 }
             }

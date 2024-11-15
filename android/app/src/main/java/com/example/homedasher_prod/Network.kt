@@ -1,11 +1,9 @@
 package com.example.homedasher_prod
 
 import android.content.Context
-import android.content.SharedPreferences
+import android.util.Log
 import android.widget.Toast
 import androidx.navigation.NavHostController
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -13,6 +11,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 
 fun loginUser(email: String, password: String, role: String, context: Context, navController: NavHostController) {
     val request = LoginRequest(email, password)
@@ -109,42 +108,6 @@ fun registerMerchant(
     }
 }
 
-fun saveJwtSecurely(token: String, role: String, context: Context) {
-    val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
-
-    val sharedPreferences: SharedPreferences = EncryptedSharedPreferences.create(
-        context,
-        "jwt_prefs",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-
-    sharedPreferences.edit().apply {
-        putString("jwt", token)
-        putString("role", role)
-        apply()
-    }
-}
-
-fun getStoredJwt(context: Context): String? {
-    val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
-
-    val sharedPreferences: SharedPreferences = EncryptedSharedPreferences.create(
-        context,
-        "jwt_prefs",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
-
-    return sharedPreferences.getString("jwt", null)
-}
-
 suspend fun getMenuItems(context: Context, merchantId: String): List<MerchantMenuItem> {
     val client = provideHttpClient(context)
     return try {
@@ -204,25 +167,114 @@ suspend fun getAllMerchants(context: Context): List<Merchant> {
     }
 }
 
-fun checkAuthenticationStatus(context: Context): Boolean {
-    val jwt = getStoredJwt(context)
-    val role = getStoredRole(context)
+suspend fun getCart(context: Context, userId: String): CartData? {
+    val client = provideHttpClient(context)
+    return try {
+        val jwt = getStoredJwt(context)
+        val response: HttpResponse = client.get("http://10.0.2.2:4000/cart/$userId") {
+            contentType(ContentType.Application.Json)
+            headers {
+                jwt?.let {
+                    append(HttpHeaders.Authorization, "Bearer $it")
+                }
+            }
+        }
 
-    return jwt != null && role != null
+        if (response.status == HttpStatusCode.OK) {
+            val jsonResponse = response.bodyAsText()
+            Log.d("getCart", "Response received: $jsonResponse")
+            val json = Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+            val cartResponse = json.decodeFromString<CartResponse>(jsonResponse)
+            cartResponse.data
+        } else {
+            Log.e("getCart", "Failed to fetch cart. Status: ${response.status}")
+            null
+        }
+    } catch (e: Exception) {
+        Log.e("getCart", "Error fetching cart", e)
+        null
+    } finally {
+        client.close()
+        Log.d("getCart", "HTTP client closed")
+    }
 }
 
-fun getStoredRole(context: Context): String? {
-    val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
+suspend fun postToCart(context: Context, userId: String, menuItemId: String, quantity: Int): Boolean {
+    val client = provideHttpClient(context)
+    return try {
+        val jwt = getStoredJwt(context)
+        val json = Json { ignoreUnknownKeys = true; isLenient = true }
+        val requestBody = json.encodeToString(AddToCartRequest(user_id = userId, menu_item_id = menuItemId, quantity = quantity))
 
-    val sharedPreferences: SharedPreferences = EncryptedSharedPreferences.create(
-        context,
-        "jwt_prefs",
-        masterKey,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+        val response: HttpResponse = client.post("http://10.0.2.2:4000/cart/add") {
+            contentType(ContentType.Application.Json)
+            headers {
+                jwt?.let {
+                    append(HttpHeaders.Authorization, "Bearer $it")
+                }
+            }
+            setBody(requestBody)
+        }
 
-    return sharedPreferences.getString("role", null)
+        response.status == HttpStatusCode.OK
+    } catch (e: Exception) {
+        false
+    } finally {
+        client.close()
+    }
+}
+
+suspend fun placeOrder(context: Context, merchantId: String, cartData: CartData): Boolean {
+    val client = provideHttpClient(context)
+    return try {
+        val jwt = getStoredJwt(context)
+        val json = Json { ignoreUnknownKeys = true; isLenient = true }
+        val items = cartData.items.map { OrderItem(menu_item_id = it.menuItem?._id ?: "", quantity = it.quantity) }
+        val requestBody = json.encodeToString(OrderRequest(merchant_id = merchantId, items = items))
+
+        val response: HttpResponse = client.post("http://10.0.2.2:4000/order/create") {
+            contentType(ContentType.Application.Json)
+            headers {
+                jwt?.let {
+                    append(HttpHeaders.Authorization, "Bearer $it")
+                }
+            }
+            setBody(requestBody)
+        }
+
+        response.status == HttpStatusCode.Created
+    } catch (e: Exception) {
+        false
+    } finally {
+        client.close()
+    }
+}
+
+suspend fun deleteCartItem(context: Context, userId: String, cartItem: CartItem): Boolean {
+    val client = provideHttpClient(context)
+    return try {
+        val jwt = getStoredJwt(context)
+        val json = Json { ignoreUnknownKeys = true; isLenient = true }
+        val menuItemId = cartItem.menuItem?._id ?: return false
+        val requestBody = json.encodeToString(RemoveItemRequest(menu_item_id = menuItemId))
+
+        val response: HttpResponse = client.delete("http://10.0.2.2:4000/cart/remove") {
+            contentType(ContentType.Application.Json)
+            headers {
+                jwt?.let {
+                    append(HttpHeaders.Authorization, "Bearer $it")
+                }
+            }
+            setBody(requestBody)
+        }
+
+        response.status == HttpStatusCode.OK
+    } catch (e: Exception) {
+        false
+    } finally {
+        client.close()
+    }
 }

@@ -1,4 +1,5 @@
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,14 +8,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.homedasher_prod.MerchantMenuItem
 import com.example.homedasher_prod.getMenuItems
+import com.example.homedasher_prod.postToCart
 import kotlinx.coroutines.launch
 
 @Composable
-fun UserMenuScreen(context: Context, merchantId: String) {
+fun UserMenuScreen(context: Context, merchantId: String, userId: String) {
     val scope = rememberCoroutineScope()
     var menuItems by remember { mutableStateOf<List<MerchantMenuItem>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -52,7 +55,7 @@ fun UserMenuScreen(context: Context, merchantId: String) {
                 modifier = Modifier.fillMaxSize().padding(16.dp)
             ) {
                 items(menuItems) { menuItem ->
-                    MenuItemCard(menuItem)
+                    MenuItemCard(menuItem, userId, context)
                 }
             }
         }
@@ -60,7 +63,11 @@ fun UserMenuScreen(context: Context, merchantId: String) {
 }
 
 @Composable
-fun MenuItemCard(menuItem: MerchantMenuItem) {
+fun MenuItemCard(menuItem: MerchantMenuItem, userId: String, context: Context) {
+    val scope = rememberCoroutineScope()
+    var quantity by remember { mutableStateOf(1) }
+    val appContext = LocalContext.current.applicationContext
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -81,11 +88,42 @@ fun MenuItemCard(menuItem: MerchantMenuItem) {
                 Text(
                     text = if (menuItem.available) "Available" else "Unavailable",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (menuItem.available) Color(0xFF006400) else Color.Red, // Dark Green
+                    color = if (menuItem.available) Color(0xFF006400) else Color.Red,
                     modifier = Modifier.weight(1f)
                 )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { if (quantity > 1) quantity-- }) {
+                        Text("-", style = MaterialTheme.typography.bodyLarge)
+                    }
+                    Text("$quantity", style = MaterialTheme.typography.bodyLarge)
+                    IconButton(onClick = { quantity++ }) {
+                        Text("+", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
                 Button(
-                    onClick = { /* Add to cart action */ },
+                    onClick = {
+                        if (menuItem.available) {
+                            scope.launch {
+                                try {
+                                    postToCart(context, userId, menuItem._id, quantity)
+                                    Toast.makeText(
+                                        appContext,
+                                        "Item added successfully!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } catch (e: Exception) {
+                                    Toast.makeText(
+                                        appContext,
+                                        "Failed to add item: ${e.message}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                    },
+                    enabled = menuItem.available,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Text("Add to Cart", color = Color.White)
@@ -93,22 +131,4 @@ fun MenuItemCard(menuItem: MerchantMenuItem) {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun MenuItemCardPreview() {
-    MenuItemCard(
-        menuItem = MerchantMenuItem(
-            merchantId = "1",
-            itemName = "Sample Item",
-            description = "This is a sample item.",
-            price = 9.99,
-            category = "Food",
-            available = true,
-            createdAt = "2023-10-01",
-            updatedAt = "2023-10-02",
-            version = 1
-        )
-    )
 }
