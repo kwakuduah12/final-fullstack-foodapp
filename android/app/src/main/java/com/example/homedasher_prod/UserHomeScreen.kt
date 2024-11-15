@@ -1,5 +1,6 @@
 package com.example.homedasher_prod
 
+import android.content.Context
 import androidx.compose.foundation.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,27 +31,45 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 
+
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun HomeScreen() {
-    Box(
-        modifier = Modifier.verticalScroll(rememberScrollState())
-    ) {
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(0.dp, (-30).dp),
-            contentDescription = "Header",
-            painter = painterResource(id = R.drawable.bg_main),
-            contentScale = ContentScale.FillWidth
-        )
-        Column {
-            AppBar()
-            Content()
+fun HomeScreen(context: Context, navController: NavController, viewModel: MerchantViewModel = viewModel()) {
+    LaunchedEffect(Unit) {
+        viewModel.fetchMerchants(context)
+    }
+
+    if (viewModel.isLoading) {
+        CircularProgressIndicator(modifier = Modifier.fillMaxSize())
+    } else if (!viewModel.errorMessage.isNullOrEmpty()) {
+        Text(text = viewModel.errorMessage ?: "", modifier = Modifier.fillMaxSize())
+    } else {
+        Box(
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(0.dp, (-30).dp),
+                contentDescription = "Header",
+                painter = painterResource(id = R.drawable.bg_main),
+                contentScale = ContentScale.FillWidth
+            )
+            Column {
+                AppBar()
+                Content(viewModel.merchants, navController)
+            }
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar() {
@@ -87,12 +107,14 @@ fun AppBar() {
 }
 
 @Composable
-fun Content() {
+fun Content(merchants: List<Merchant>, navController: NavController) {
     Header()
     Spacer(modifier = Modifier.height(16.dp))
     Promotions()
     Spacer(modifier = Modifier.height(16.dp))
-    CategorySection()
+    if (merchants.isNotEmpty()) {
+        CategorySection(merchants = merchants, navController = navController)
+    }
     Spacer(modifier = Modifier.height(16.dp))
     BestSellerSection()
 }
@@ -251,12 +273,20 @@ fun PropotionItem(
     }
 }
 
-
 @Composable
-fun CategorySection() {
+fun CategorySection(merchants: List<Merchant>, navController: NavController) {
+    val storeTypeImages = mapOf(
+        "Asian" to R.drawable.asian,
+        "Italian" to R.drawable.italian,
+        "African" to R.drawable.jollof,
+        "Mexican" to R.drawable.tacos,
+        "Grocery" to R.drawable.ic_cheese
+    )
+
+    val storeTypes = merchants.map { it.storeType }.distinct()
+
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -271,28 +301,17 @@ fun CategorySection() {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(20.dp) // Add spacing here
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            CategoryButton(
-                text = "Asian",
-                icon = painterResource(id = R.drawable.asian),
-                backgroundColor = Color(0xffFEF4E7)
-            )
-            CategoryButton(
-                text = "Italian",
-                icon = painterResource(id = R.drawable.italian),
-                backgroundColor = Color(0xffF6FBF3)
-            )
-            CategoryButton(
-                text = "African",
-                icon = painterResource(id = R.drawable.jollof),
-                backgroundColor = Color(0xffFFFBF3)
-            )
-            CategoryButton(
-                text = "Mexican",
-                icon = painterResource(id = R.drawable.tacos),
-                backgroundColor = Color(0xffF6E6E9)
-            )
+            storeTypes.forEach { storeType ->
+                val imageRes = storeTypeImages[storeType] ?: R.drawable.bg_main
+                CategoryButton(
+                    text = storeType,
+                    icon = painterResource(id = imageRes),
+                    backgroundColor = Color(0xffFEF4E7),
+                    onClick = { navController.navigate("category/$storeType") }
+                )
+            }
         }
     }
 }
@@ -301,12 +320,13 @@ fun CategorySection() {
 fun CategoryButton(
     text: String = "",
     icon: Painter,
-    backgroundColor: Color
+    backgroundColor: Color,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .width(72.dp)
-            .clickable { }
+            .clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
@@ -442,5 +462,5 @@ fun BestSellerItem(
 @Composable
 @Preview(showSystemUi = true, showBackground = true)
 fun PrevScreen() {
-        HomeScreen()
+        HomeScreen(context = LocalContext.current, navController = rememberNavController())
 }
