@@ -14,14 +14,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.homedasher_prod.ui.theme.HomeDasherProdTheme
-
-import android.util.Log
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
+import androidx.navigation.compose.*
+import android.util.Log
 import androidx.navigation.navArgument
+import com.example.homedasher_prod.ui.theme.HomeDasherProdTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +37,6 @@ class MainActivity : ComponentActivity() {
         val context = LocalContext.current
         val startDestination = determineStartDestination(context)
 
-        // State to hold cart information, now CartData type
         val cartState = remember { mutableStateOf<CartData?>(null) }
 
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -66,9 +63,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 composable("merchantHomeScreen") {
+                    val userId = cartState.value?.user_id ?: ""
+                    val viewModel: MerchantViewModel = viewModel()
+
                     MerchantHomeScreen(
-                        navController,
-                        context = LocalContext.current
+                        context = LocalContext.current,
+                        userId = userId,
+                        navController = navController,
+                        viewModel = viewModel
                     )
                 }
                 composable("category/{storeType}") { backStackEntry ->
@@ -106,13 +108,23 @@ class MainActivity : ComponentActivity() {
                         Log.e("MainContent", "Required arguments are null")
                     }
                 }
-                // Add UserCartItems route
                 composable("userCartItems/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
                     val userId = backStackEntry.arguments?.getString("userId")
                     if (userId != null) {
                         UserCartItems(userId = userId)
                     } else {
                         Log.e("MainContent", "userId is null")
+                    }
+                }
+                composable(
+                    "profile/{profileId}",
+                    arguments = listOf(navArgument("profileId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val profileId = backStackEntry.arguments?.getString("profileId")
+                    if (profileId != null) {
+                        ProfileScreen(profileId = profileId, context = LocalContext.current)
+                    } else {
+                        Log.e("MainContent", "profileId is null")
                     }
                 }
             }

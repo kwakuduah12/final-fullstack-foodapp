@@ -12,6 +12,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.decodeFromJsonElement
 
 fun loginUser(email: String, password: String, role: String, context: Context, navController: NavHostController) {
     val request = LoginRequest(email, password)
@@ -274,6 +275,43 @@ suspend fun deleteCartItem(context: Context, userId: String, cartItem: CartItem)
         response.status == HttpStatusCode.OK
     } catch (e: Exception) {
         false
+    } finally {
+        client.close()
+    }
+}
+
+suspend fun getProfile(context: Context): Any? {
+    val client = provideHttpClient(context)
+    val role = getStoredRole(context) ?: return null
+    val endpoint = if (role == "Merchant") "merchant/profile" else "user/profile"
+
+    return try {
+        val jwt = getStoredJwt(context)
+        val response: HttpResponse = client.get("http://10.0.2.2:4000/$endpoint") {
+            contentType(ContentType.Application.Json)
+            headers {
+                jwt?.let {
+                    append(HttpHeaders.Authorization, "Bearer $it")
+                }
+            }
+        }
+
+        if (response.status == HttpStatusCode.OK) {
+            val jsonResponse = response.bodyAsText()
+            val json = Json { ignoreUnknownKeys = true }
+            val profileData = json.decodeFromString<ProfileResponse>(jsonResponse)
+
+            if (role == "Merchant") {
+                json.decodeFromJsonElement<MerchantProfile>(profileData.data)
+            } else {
+                json.decodeFromJsonElement<UserProfile>(profileData.data)
+            }
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        Log.e("getProfile", "Error fetching profile", e)
+        null
     } finally {
         client.close()
     }

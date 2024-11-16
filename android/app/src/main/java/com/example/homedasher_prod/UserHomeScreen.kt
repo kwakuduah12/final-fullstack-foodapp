@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.ShoppingCart
@@ -100,25 +101,31 @@ fun AppBar(context: Context, userId: String, navController: NavController) {
             try {
                 val cart = getCart(context, userId)
                 isCartNotEmpty = cart != null && cart.items.isNotEmpty()
-            } catch (e: Exception) {
-                Log.e("AppBar", "Error retrieving cart", e)
+            } catch (_: Exception) {
             }
         }
     }
 
     Row(
-        Modifier
+        modifier = Modifier
+            .fillMaxWidth()
             .padding(16.dp)
-            .height(46.dp),
+            .height(56.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         TextField(
             value = "",
             onValueChange = {},
-            label = { Text(text = "Search Restaurants...", fontSize = 12.sp) },
+            label = { Text(text = "Search...", fontSize = 14.sp) },
             singleLine = true,
-            leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = "Search") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Rounded.Search,
+                    contentDescription = "Search",
+                    modifier = Modifier.size(20.dp)
+                )
+            },
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = Color.White,
                 focusedIndicatorColor = Color.Transparent,
@@ -128,19 +135,21 @@ fun AppBar(context: Context, userId: String, navController: NavController) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .height(32.dp)
         )
+
         Spacer(modifier = Modifier.width(8.dp))
+
         IconButton(onClick = {
             coroutineScope.launch {
                 try {
                     val cart = getCart(context, userId)
                     if (cart != null && isCartNotEmpty) {
-                        navController.navigate("userCartItems/${userId}")
+                        navController.navigate("userCartItems/$userId")
                     } else {
                         Toast.makeText(context, "Your cart is empty", Toast.LENGTH_SHORT).show()
                     }
-                } catch (e: Exception) {
-                    Log.e("AppBar", "Error retrieving cart", e)
+                } catch (_: Exception) {
                 }
             }
         }) {
@@ -160,6 +169,7 @@ fun AppBar(context: Context, userId: String, navController: NavController) {
                 }
             }
         }
+
         IconButton(onClick = {
             performLogout(context)
             Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
@@ -169,11 +179,43 @@ fun AppBar(context: Context, userId: String, navController: NavController) {
         }) {
             Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.White)
         }
-        IconButton(onClick = {}) {
+
+        IconButton(onClick = {
+            Toast.makeText(context, "Notifications clicked", Toast.LENGTH_SHORT).show()
+        }) {
             Icon(imageVector = Icons.Outlined.Notifications, contentDescription = "Notification", tint = Color.White)
+        }
+
+        IconButton(onClick = {
+            coroutineScope.launch {
+                try {
+                    val profile = getProfile(context)
+                    when (profile) {
+                        is MerchantProfile -> {
+                            navController.navigate("profile/${profile._id}")
+                        }
+                        is UserProfile -> {
+                            navController.navigate("profile/${profile._id}")
+                        }
+                        else -> {
+                            Toast.makeText(context, "Failed to load profile", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(context, "Error fetching profile", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }) {
+            Icon(
+                imageVector = Icons.Filled.AccountCircle,
+                contentDescription = "Profile",
+                tint = Color.White
+            )
         }
     }
 }
+
+
 
 @Composable
 fun Content(merchants: List<Merchant>, navController: NavController) {

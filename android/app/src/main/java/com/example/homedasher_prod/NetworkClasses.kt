@@ -7,6 +7,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 
 
 object HttpClientProvider {
@@ -142,3 +143,23 @@ data class OrderItem(
 data class RemoveItemRequest(
     val menu_item_id: String
 )
+
+@Serializable
+data class MerchantProfile(
+    val _id: String,
+    val store_name: String,
+    val address: String,
+    val email: String,
+    val phone_number: String,
+    val store_type: String
+)
+
+@Serializable
+data class UserProfile(
+    val _id: String,
+    val name: String,
+    val email: String
+)
+
+@Serializable
+data class ProfileResponse(val data: JsonElement)
