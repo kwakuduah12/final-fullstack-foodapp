@@ -168,7 +168,7 @@ const Header = () => {
                 <label htmlFor="merchantRole">Merchant</label>
               </div>
 
-              <button type="submit" className="submit-btn">Submit</button>
+              <button type="submit" className="submit-btn">Login</button>
             </form>
             <p>
               <a href="#forgotPassword" className="forgot-password-link" onClick={toggleForgotPasswordPopup}>Forgot Password?</a>
