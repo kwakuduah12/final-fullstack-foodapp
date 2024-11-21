@@ -23,10 +23,10 @@ const MerchantSchema = new mongoose.Schema({
         enum: ['African', 'Mexican', 'Asian', 'Italian', 'Other'], // Adjust based on possible store types
         required: true,
     },
-    created_at: {
-        type: Date,
-        default: Date.now,
-    },
+    // created_at: {
+    //     type: Date,
+    //     default: Date.now,
+    // },
     
     password: {
         type: String,
@@ -34,10 +34,15 @@ const MerchantSchema = new mongoose.Schema({
         minlength: [6, 'Minimum password length is 6 characters'],
     },
 
-    updated_at: {
-        type: Date,
-        default: Date.now,
-    }
+    // updated_at: {
+    //     type: Date,
+    //     default: Date.now,
+    // },
+    wallet: {
+        type: Number,
+        default: 100,
+    },
+    timestamps: true,
 });
 
 module.exports = mongoose.model('Merchant', MerchantSchema);
