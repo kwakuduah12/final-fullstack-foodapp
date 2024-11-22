@@ -42,7 +42,6 @@ const MerchantSchema = new mongoose.Schema({
         type: Number,
         default: 100,
     },
-    timestamps: true,
 });
 
 module.exports = mongoose.model('Merchant', MerchantSchema);

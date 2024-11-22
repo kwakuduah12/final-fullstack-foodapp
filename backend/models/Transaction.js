@@ -32,10 +32,9 @@ const TransactionSchema = new mongoose.Schema({
         enum : ["credit", "debit"],
         required : true,
     },
-    timestamps: true,
 });
 
-await TransactionSchema.save();
+//await TransactionSchema.save();
 
 module.exports = mongoose.model("Transaction", TransactionSchema);
 
