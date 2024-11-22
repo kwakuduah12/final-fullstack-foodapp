@@ -12,6 +12,10 @@ const app = express();
 const UserRoutes = require('./routes/userRoutes');
 const restaurantRoutes = require('./routes/restaurantRoutes');
 const menuRoutes = require('./routes/menuRoutes');
+const merchantRoutes = require('./routes/merchantsRoutes');
+const orderRoutes = require('./routes/orderRoutes'); 
+const CartRoutes = require('./routes/cartRoutes');  
+const walletRoutes = require('./routes/walletRoutes');
 
 
 app.use(cors());
@@ -23,6 +27,11 @@ app.use(bodyParser.json());
 app.use('/user', UserRoutes);
 app.use('/restaurant', restaurantRoutes);
 app.use('/menu', menuRoutes);
+app.use('/merchant', merchantRoutes);
+app.use('/order', orderRoutes);
+app.use('/cart', CartRoutes);
+app.use('/wallet', walletRoutes);
+
 const connectDB = async () => {
     try {
         await mongoose.connect(uri);
