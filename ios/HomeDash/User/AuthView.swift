@@ -1,7 +1,7 @@
 import SwiftUI
 
 // Signup Function (for actual backend signup API)
-func signup(name: String, email: String, password: String, confirmPassword: String, completion: @escaping (Result<Bool, Error>) -> Void) {
+func signup(name: String, email: String, password: String, confirmPassword: String, role: String, completion: @escaping (Result<Bool, Error>) -> Void) {
     guard let url = URL(string: "http://localhost:4000/user/signup") else {
         print("Invalid URL")
         return
@@ -15,7 +15,8 @@ func signup(name: String, email: String, password: String, confirmPassword: Stri
         "name": name,
         "email": email,
         "password": password,
-        "confirmPassword": confirmPassword
+        "confirmPassword": confirmPassword,
+        "role": role
     ]
     
     do {
@@ -85,9 +86,11 @@ struct AuthView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var name = ""
+    @State private var selectedRole = "User" // Default role
     
     // Use @AppStorage to persist authentication state
     @AppStorage("isAuthenticated") var isAuthenticated: Bool = false
+    @AppStorage("userRole") var userRole: String = "User" // To save role
 
     var body: some View {
         NavigationView {
@@ -134,7 +137,6 @@ struct AuthView: View {
                             .cornerRadius(10)
                         
                         SecureField("Password", text: $password)
-//                            .textContentType(.newPassword)
                             .padding()
                             .frame(maxWidth: .infinity)
                             .background(Color.white)
@@ -142,7 +144,6 @@ struct AuthView: View {
 
                         if !isLoginMode {
                             SecureField("Confirm Password", text: $confirmPassword)
-//                                .textContentType(.newPassword)
                                 .padding()
                                 .frame(maxWidth: .infinity)
                                 .background(Color.white)
@@ -197,11 +198,12 @@ struct AuthView: View {
             }
         } else {
             // Perform signup
-            signup(name: name, email: email, password: password, confirmPassword: confirmPassword) { result in
+            signup(name: name, email: email, password: password, confirmPassword: confirmPassword, role: selectedRole) { result in
                 switch result {
                 case .success(let success):
                     if success {
                         print("Signup successful")
+                        userRole = selectedRole // Save role after successful signup
                         isAuthenticated = true // Set to true after successful signup
                     } else {
                         print("Signup failed")
