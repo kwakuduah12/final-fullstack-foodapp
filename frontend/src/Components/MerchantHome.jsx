@@ -7,9 +7,10 @@ import { useAuth } from './userContext';
 
 const MerchantHome = () => {
   const [activeSection, setActiveSection] = useState('dashboard'); 
-  const [orders, setOrders] = useState([]); 
-  const [mostOrderedFoods, setMostOrderedFoods] = useState([]); 
+  const [orders, setOrders] = useState([]); // For storing current orders from backend
+  const [mostOrderedFoods, setMostOrderedFoods] = useState([]); // For storing most ordered foods from backend
 
+  // Fetch current orders and most ordered foods on component mount
   useEffect(() => {
     fetchOrders();
     fetchMostOrderedFoods();

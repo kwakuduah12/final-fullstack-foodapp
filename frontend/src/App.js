@@ -1,4 +1,3 @@
-// App.js
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -17,10 +16,10 @@ import BecomeDasher from "./Components/BecomeDasher";
 import BecomeMerchant from "./Components/BecomeMerchant";
 import UseMobileApp from "./Components/UseMobileApp";
 import HomePage from "./Components/HomePage";
-import "./Styles/Home.css";
+import MerchantsPage from "./Components/MerchantsPage";
 import MerchantHome from "./Components/MerchantHome";
 import Menu from "./Components/Menu";
-import ProtectedRoutes from "./Components/ProtectedRoutes"; // Import PrivateRoute
+import ProtectedRoutes from "./Components/ProtectedRoutes";
 
 const App = () => {
   const location = useLocation();
@@ -54,7 +53,15 @@ const App = () => {
           }
         />
 
-        {/* Protected Routes */}
+        <Route
+          path="/merchants/:category"
+          element={
+            <ProtectedRoutes allowedRoles={['Merchant', 'User']}>
+              <MerchantsPage />
+            </ProtectedRoutes>
+          }
+        />
+
         <Route
           path="/merchanthome"
           element={

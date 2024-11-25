@@ -1,87 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FaCoffee, FaPizzaSlice, FaHamburger, FaIceCream, FaCarrot, FaFish, FaBreadSlice, FaAppleAlt } from 'react-icons/fa';
-import Sidebar from './Sidebar';
-import HeaderHome from './HeaderHome';
+import Layout from './Layout';
 import '../Styles/Home.css';
 
 const HomePage = () => {
+  const [categories, setCategories] = useState([]);
+
+  const fetchCategories = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch('http://localhost:4000/menu/categories-and-merchants', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setCategories(data.data);
+      } else {
+        console.error('Failed to fetch categories:', data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const categoryIcons = {
+    Coffee: <FaCoffee size={40} />,
+    'Main Course': <FaPizzaSlice size={40} />,
+    Dessert: <FaHamburger size={40} />,
+    Drink: <FaIceCream size={40} />,
+    Vegetables: <FaCarrot size={40} />,
+    Fish: <FaFish size={40} />,
+    Bread: <FaBreadSlice size={40} />,
+    Fruits: <FaAppleAlt size={40} />,
+  };
+
   return (
-    <div className="home-page">
-      <HeaderHome />
-      <div className="main-container">
-        <Sidebar />
-        <div className="main-content">
-          <div className="content-section categories">
-            <h2>Categories</h2>
-            <div className="category-icons">
-              <div className="category-icon">
-                <FaCoffee size={40} />
-                <p>Coffee</p>
-              </div>
-              <div className="category-icon">
-                <FaPizzaSlice size={40} />
-                <p>Pizza</p>
-              </div>
-              <div className="category-icon">
-                <FaHamburger size={40} />
-                <p>Burgers</p>
-              </div>
-              <div className="category-icon">
-                <FaIceCream size={40} />
-                <p>Desserts</p>
-              </div>
-              <div className="category-icon">
-                <FaCarrot size={40} />
-                <p>Healthy</p>
-              </div>
-              <div className="category-icon">
-                <FaFish size={40} />
-                <p>Seafood</p>
-              </div>
-              <div className="category-icon">
-                <FaBreadSlice size={40} />
-                <p>Bakery</p>
-              </div>
-              <div className="category-icon">
-                <FaAppleAlt size={40} />
-                <p>Fruits</p>
-              </div>
+    <Layout>
+      <div className="content-section categories">
+        <h2>Categories</h2>
+        <div className="category-icons">
+          {categories.map((category, index) => (
+            <div key={index} className="category-icon">
+              <Link
+                to={`/merchants/${category.category}`}
+                state={{ merchants: category.merchants }}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                {categoryIcons[category.category] || <FaAppleAlt size={40} />}
+                <p>{category.category}</p>
+              </Link>
             </div>
-          </div>
-
-          <div className="content-section promotions">
-            <h2>Promotions</h2>
-            <div className="promotion-cards">
-              <div className="promotion-card">
-                <p>Get $5 off orders $20+ with code SPEEDWAY5OFF</p>
-              </div>
-              <div className="promotion-card">
-                <p>20% off orders at 7-Eleven!</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="content-section order-again">
-            <h2>Order Again</h2>
-            <div className="order-again-cards">
-              <div className="order-again-card">
-                <img src="path/to/mcdonalds-image.jpg" alt="McDonald's" />
-                <p>McDonald's</p>
-              </div>
-              <div className="order-again-card">
-                <img src="path/to/tacobell-image.jpg" alt="Taco Bell" />
-                <p>Taco Bell</p>
-              </div>
-              <div className="order-again-card">
-                <img src="path/to/checkers-image.jpg" alt="Checkers" />
-                <p>Checkers</p>
-              </div>
-              {/* Add more cards as needed */}
-            </div>
-          </div>
+          ))}
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

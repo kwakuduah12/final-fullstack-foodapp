@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Menu.css';
 import { FaPlus } from 'react-icons/fa';
-import FoodCard from './FoodCard'; 
+import FoodCard from './FoodCard'; // Import FoodCard component
 
 const Menu = () => {
   const [showAddFoodPopup, setShowAddFoodPopup] = useState(false);
@@ -12,7 +12,7 @@ const Menu = () => {
     category: '',
     available: false,
   });
-  const [foods, setFoods] = useState([]);
+  const [foods, setFoods] = useState([]); // State to hold fetched foods
 
   useEffect(() => {
     fetchAvailableFoods();
@@ -20,7 +20,7 @@ const Menu = () => {
 
   const fetchAvailableFoods = async () => {
     try {
-      const response = await fetch('http://localhost:4000/menu/most-ordered', {
+      const response = await fetch('http://localhost:4000/menu/merchant/merchantId', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
@@ -90,7 +90,7 @@ const Menu = () => {
 
       <div className="food-list">
         {foods.map(food => (
-          <FoodCard key={food._id} food={food} onEdit={() => {}} /> 
+          <FoodCard key={food._id} food={food} onEdit={() => {}} /> // Pass props to FoodCard
         ))}
       </div>
 

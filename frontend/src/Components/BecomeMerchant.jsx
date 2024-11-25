@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import '../Styles/BecomeMerchant.css';
-import MerchantDashboard from './MerchantHome';
+import LoginPopup from './LoginPopUp';
 
 const BecomeMerchant = () => {
   const [storeType, setStoreType] = useState('');
   const [registered, setRegistered] = useState(false);
+  const [error, setError] = useState(''); // State to store error message
   const [formData, setFormData] = useState({
     storeName: '',
     address: '',
@@ -14,8 +15,9 @@ const BecomeMerchant = () => {
     phone: '',
     storeType: ''
   });
+  const [isSignInPopupOpen, setSignInPopupOpen] = useState(false); // State to control LoginPopup visibility
 
-  const storeTypes = ['Grocery', 'Pet', 'African', 'Restaurant'];
+  const storeTypes = ['Asian', 'Mexican', 'African', 'Italian'];
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -26,7 +28,7 @@ const BecomeMerchant = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:4000/merchant/signup', { // Adjust the URL if needed
+      const response = await fetch('http://localhost:4000/merchant/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,20 +45,41 @@ const BecomeMerchant = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log('Signup successful:', data);
-        setRegistered(true); // Redirect to the dashboard on successful registration
+        console.log('Signup successful');
+        setRegistered(true);
+        setSignInPopupOpen(true);
+        setError(''); // Clear error if registration is successful
       } else {
         const errorData = await response.json();
-        console.error('Signup failed:', errorData);
+        setError(errorData.message || 'Signup failed. Please try again.');
       }
     } catch (error) {
       console.error('Error during signup:', error);
+      setError('An unexpected error occurred. Please try again later.');
     }
   };
 
-  if (registered) {
-    return <MerchantDashboard />;
+  const handleSignInClose = () => {
+    setSignInPopupOpen(false);
+  };
+
+  if (registered && isSignInPopupOpen) {
+    return (
+      <LoginPopup
+        isVisible={isSignInPopupOpen}
+        onClose={handleSignInClose}
+        onSubmit={(e) => {
+          e.preventDefault();
+          // Add login logic here if needed
+          handleSignInClose();
+        }}
+        selectedRole="Merchant"
+        handleRoleChange={() => {}}
+        toggleForgotPasswordPopup={() => {}}
+        toggleSignUpPopup={() => {}}
+        errorMessage={error}
+      />
+    );
   }
 
   return (
@@ -64,6 +87,7 @@ const BecomeMerchant = () => {
       <section className="hero-section">
         <div className="register-card">
           <h2>Register Your Store</h2>
+          {error && <p className="error-message">{error}</p>} {/* Display error message */}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="storeName">Name of Store</label>
