@@ -6,7 +6,7 @@
 import SwiftUI
 
 @main
-struct YourAppNameApp: App {
+struct HomeDash: App {
     var body: some Scene {
         WindowGroup {
             RootView() // Start with RootView
