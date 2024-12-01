@@ -1,4 +1,3 @@
-
 import SwiftUI
 import CoreLocation
 import MapKit
@@ -17,7 +16,7 @@ struct Notification: Identifiable {
     let imageName: String
 }
 
-// ContentView that includes location, promotions, and a map feature
+// ContentView that include s location, promotions, and a map feature
 struct ContentView: View {
     @StateObject private var locationManager = LocationManager()
     @State private var searchText = ""
