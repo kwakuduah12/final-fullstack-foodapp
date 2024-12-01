@@ -128,8 +128,12 @@ const Transaction = () => {
 
   // Fetch wallet balance and transactions on component mount
   useEffect(() => {
-    fetchBalance();
-    fetchTransactions();
+    const fetchData = async () => {
+      setLoading(true); // Ensure loading state is set
+      await fetchBalance();
+      await fetchTransactions();
+    };
+    fetchData();
   }, []);
 
   // Render loading or error
@@ -201,3 +205,5 @@ const Transaction = () => {
 };
 
 export default Transaction;
+
+

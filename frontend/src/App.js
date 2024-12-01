@@ -7,7 +7,6 @@
 // } from "react-router-dom";
 // import { AuthProvider } from './Components/userContext';
 // import Header from "./Components/Header";
-// import HeaderHome from "./Components/HeaderHome";
 // import FeatureSection from "./Components/FeatureSection";
 // import Testimonials from "./Components/Testimonials";
 // import Footer from "./Components/Footer";
@@ -28,17 +27,24 @@
 // const App = () => {
 //   const location = useLocation();
 
+//   // Define routes that require the Sidebar
+//   const routesWithSidebar = [
+//     "/home-page",
+//     "/merchanthome",
+//     "/menu",
+//     "/account",
+//     "/wallet",
+//     "/cart",
+//   ];
+
+//   const showSidebar = routesWithSidebar.includes(location.pathname);
+
 //   return (
 //     <div className="App">
 //       {location.pathname === "/" && <Header />}
 
 //       <div className="main-container">
-//         {location.pathname !== "/" &&
-//           location.pathname !== "/become-dasher" &&
-//           location.pathname !== "/become-merchant" &&
-//           location.pathname !== "/use-mobile-app" && (
-//             <Sidebar />
-//         )}
+//         {showSidebar && <Sidebar />} {/* Render Sidebar only for specific routes */}
 
 //         <Routes>
 //           <Route
@@ -121,7 +127,6 @@
 
 // export default WrappedApp;
 
-
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -146,6 +151,7 @@ import Sidebar from "./Components/Sidebar";
 import ProtectedRoutes from "./Components/ProtectedRoutes";
 import Transaction from "./Components/Transaction"; // Transaction component
 import Cart from "./Components/Cart"; // Cart component
+import Help from "./Components/Help"; // Help component
 import "./Styles/App.css";
 
 const App = () => {
@@ -235,6 +241,10 @@ const App = () => {
               </ProtectedRoutes>
             }
           />
+          <Route
+            path="/help"
+            element={<Help />}
+          />
         </Routes>
       </div>
     </div>
@@ -250,5 +260,4 @@ const WrappedApp = () => (
 );
 
 export default WrappedApp;
-
 
