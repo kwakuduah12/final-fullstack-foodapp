@@ -68,15 +68,29 @@
 
 .popup-content {
   background: white;
-  padding: 5px;
+  padding: 15px;
   border-radius: 10px;
-  width: 650px;
+  width: 600px;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
 }
 
 .popup-content h3 {
   margin-top: 0;
   font-size: 22px;
+  text-align: center;
+}
+
+.close-popup {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+  color: #000;
+  font-weight: bold;
 }
 
 .popup-content form {
@@ -98,65 +112,65 @@
   padding: 0;
 }
 
-.popup-content .popup-buttons {
+.popup-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: center; /* Center buttons horizontally */
+  gap: 10px; /* Space between buttons */
 }
+
+.save-changes-button,
+.add-food-button {
+  background-color: #e29326;
+  color: white;
+  padding: 12px 20px; /* Adjust padding for better proportions */
+  text-align: center;
+  font-size: 16px;
+  margin: 10px 0;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  min-width: 150px; /* Ensures consistent button width */
+  display: inline-block;
+  white-space: nowrap; /* Prevents text from wrapping */
+}
+
+.save-changes-button:hover,
+.add-food-button:hover {
+  background-color: #eac187; /* Lighten the hover color */
+  opacity: 0.9; /* Add slight transparency */
+}
+
+.cancel-button {
+  background-color: #e29326;
+  color: white;
+  padding: 12px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 10px 0;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  min-width: 150px;
+  display: inline-block;
+}
+
+.cancel-button:hover {
+  background-color: #eac187;
+  opacity: 0.9;
+}
+
 .availability-container {
   display: flex;
   align-items: center;
 }
 
 .availability-container label {
-  margin-right: 10px; 
+  margin-right: 10px;
   font-size: 16px;
 }
 
 .availability-container input[type="checkbox"] {
-  transform: scale(1.2); 
-}
-
-
-.add-food-button {
-  background-color: #e29326; 
-  color: white;
-  padding: 10px 10px;
-  text-align: center;
-  font-size: 16px;
-  margin: 10px 5px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  width: 100px; 
-}
-
-
-.cancel-button {
-  background-color: #e29326; 
-  color: white;
-  padding: 10px 20px;
-  text-align: center;
-  font-size: 16px;
-  margin: 10px 5px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  width: 100px; 
-}
-
-.add-food-button:hover {
-  background-color: #eac187; 
-}
-
-.cancel-button:hover {
-  background-color: #eac187; 
-}
-
-
-.add-food-button:hover,
-.cancel-button:hover {
-  opacity: 0.9;
-
+  transform: scale(1.2);
 }
 
 .food-list {

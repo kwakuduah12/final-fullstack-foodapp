@@ -17,9 +17,12 @@ const MerchantHome = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [passwordError, setPasswordError] = useState(''); // For password validation errors
+  const [cashAccount, setCashAccount] = useState([]); // Stores completed orders
+  const [totalCash, setTotalCash] = useState(0); // Stores the total cash amount  
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -109,7 +112,6 @@ const MerchantHome = () => {
   };
 
   const handleStatusChange = (newStatus) => {
-    // Update the order status on the backend
     axios
       .put(
         `http://localhost:4000/order/update-status/${selectedOrder._id}`,
@@ -125,6 +127,38 @@ const MerchantHome = () => {
           alert(`Order status updated to: ${newStatus}`);
           setOrderModalOpen(false);
           fetchOrders(); // Refresh the orders list
+  
+          // Add items to Cash Account if the status is 'Completed'
+          if (newStatus === 'Completed') {
+            console.log('Order marked as Completed:', selectedOrder);
+
+            const completedItems = selectedOrder.items.map((item) => ({
+              id: item._id,
+              name: item.menu_item_id?.item_name || 'Unknown Item',
+              price: item.menu_item_id?.price || 0,
+              quantity: item.quantity,
+              orderId: selectedOrder._id, // Track which order the item belongs to
+            }));
+            console.log('Completed Items:', completedItems);
+  
+            // Update the cash account state
+            setCashAccount((prev) => {
+              const updatedAccount = [...prev, ...completedItems];
+              console.log('Updated Cash Account:', updatedAccount);
+              return updatedAccount;
+            });
+  
+            // Update the total cash
+            const completedTotal = completedItems.reduce(
+              (sum, item) => sum + item.price * item.quantity,
+              0
+            );
+            setTotalCash((prev) => {
+              const newTotal = prev + completedTotal;
+              console.log('Total Cash:', newTotal);
+              return newTotal;
+            });
+          }
         } else {
           console.error('Failed to update order status');
         }
@@ -143,21 +177,31 @@ const MerchantHome = () => {
   // Submit updated profile details to the backend
   const handleEditSubmit = async () => {
     try {
-      const response = await axios.put('http://localhost:4000/merchant/profile', profile, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
+      const response = await axios.put(
+        'http://localhost:4000/merchant/profile', // Backend endpoint
+        profile, // Updated profile data
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`, // Add token for authentication
+          },
+        }
+      );
+  
       if (response.status === 200) {
         alert('Profile updated successfully!');
-        setProfile(response.data.updatedProfile);
-        setEditModalOpen(false);
+        setProfile(response.data.updatedProfile); // Update the local profile state
+        setEditModalOpen(false); // Close the modal
       } else {
-        console.error('Failed to update profile:', response.data.message);
+        alert(`Failed to update profile: ${response.data.message}`);
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('Error in handleEditSubmit:', error); // Log the full error
+      if (error.response) {
+        console.error('Server responded with:', error.response.data); // Log server response
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        alert('An error occurred while updating your profile. Please try again.');
+      }
     }
   };
 
@@ -182,15 +226,15 @@ const MerchantHome = () => {
   };
 
   const handlePasswordChange = async () => {
-    setPasswordError(''); // Clear any previous errors
+    setPasswordError(''); // Clear any previous errors.
   
     if (!currentPassword || !newPassword) {
       setPasswordError('Please fill in both fields.');
       return;
     }
   
-    if (currentPassword === newPassword) {
-      setPasswordError('Cannot use the same password.');
+    if (newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters long.');
       return;
     }
   
@@ -209,12 +253,16 @@ const MerchantHome = () => {
         alert('Password changed successfully!');
         setCurrentPassword('');
         setNewPassword('');
-      } else {
-        setPasswordError('Current password incorrect.');
+        setChangePasswordModalOpen(false); // Close the modal.
       }
     } catch (error) {
       console.error('Error changing password:', error);
-      setPasswordError('Current password incorrect.');
+  
+      if (error.response?.data?.message) {
+        setPasswordError(error.response.data.message);
+      } else {
+        setPasswordError('An unexpected error occurred. Please try again.');
+      }
     }
   };
 
@@ -229,36 +277,38 @@ const MerchantHome = () => {
               <div className="section">
                 <h2 className="section-title">Current Orders</h2>
                 <div className="order-list">
-                  {orders.length > 0 ? (
-                    orders.map((order) => (
-                      <div key={order._id} className="order">
-                        <p>Order ID: {order._id}</p>
-                        <p>Total Price: ${order.total_price}</p>
-                        <p>Status: {order.status}</p>
-                        <p>Name of Customer: {order.user_id.name}</p>
-                        <p>Order Date: {new Date(order.order_date).toLocaleString()}</p>
-                        {order.items && order.items.length > 0 ? (
-                          <div>
+                {orders.length > 0 ? (
+                  orders.map((order) => (
+                    <div key={order._id} className="order">
+                      <p>Order ID: {order._id}</p>
+                      <p>Total Price: ${order.total_price}</p>
+                      <p>Status: {order.status}</p>
+                      <p>Name of Customer: {order.user_id?.name || 'Unknown'}</p>
+                      <p>Order Date: {new Date(order.order_date).toLocaleString()}</p>
+                      {order.items && order.items.length > 0 ? (
+                        <div>
                           <h4>Items:</h4>
-                          {order.items.map(item => (
-                          <p key={item._id}>{item.menu_item_id.item_name} - Quantity: {item.quantity}</p>
+                          {order.items.map((item) => (
+                            <p key={item._id}>
+                              {item.menu_item_id?.item_name || 'Unknown Item'} - Quantity: {item.quantity}
+                            </p>
                           ))}
-                          </div>
-                          ) : (
-                          <p>No items in this order</p>
-                          )}
-                        <button
-                          className="see-details-link"
-                          onClick={() => handleSeeDetails(order)}
-                        >
-                          See Details
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <p>No current orders</p>
-                  )}
-                </div>
+                        </div>
+                      ) : (
+                        <p>No items in this order</p>
+                      )}
+                      <button
+                        className="see-details-link"
+                        onClick={() => handleSeeDetails(order)}
+                      >
+                        See Details
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p>No current orders</p>
+                )}
+              </div>
               </div>
   
               {/* Most Ordered Foods Section */}
@@ -299,6 +349,7 @@ const MerchantHome = () => {
                     <p><strong>Store Type:</strong> {profile.store_type}</p>
                     <button onClick={() => setEditModalOpen(true)} className="edit-btn">Edit Account</button>
                     <button onClick={() => setDeleteModalOpen(true)} className="delete-btn">Delete Account</button>
+                    <button onClick={() => setChangePasswordModalOpen(true)} className="change-password-btn">Change Password</button>
                   </div>
                 </div>
               ) : (
@@ -306,8 +357,94 @@ const MerchantHome = () => {
               )}
             </div>
           )}
+          {activeSection === 'orders' && (
+  <div className="section">
+    <h2>Past Orders</h2>
+    <div className="orders-container">
+      {orders.length > 0 ? (
+        orders
+          .filter((order) => order.status === 'Completed' || order.status === 'Cancelled') // Only show past orders
+          .map((order) => (
+            <div
+              key={order._id}
+              className="order-card"
+              style={{
+                border: `2px solid ${
+                  order.status === 'Completed' ? 'green' : 'red'
+                }`,
+                backgroundColor: `${
+                  order.status === 'Completed' ? '#e8f5e9' : '#ffebee'
+                }`,
+              }}
+            >
+              <p><strong>Order ID:</strong> {order._id}</p>
+              <p><strong>Total Price:</strong> ${order.total_price}</p>
+              <p><strong>Status:</strong> {order.status}</p>
+              <p><strong>Customer Name:</strong> {order.user_id?.name || 'N/A'}</p>
+              <p>
+                <strong>Order Date:</strong>{' '}
+                {new Date(order.order_date).toLocaleString()}
+              </p>
+              <h4>Items:</h4>
+              {order.items && order.items.length > 0 ? (
+                order.items.map((item) => (
+                  <p key={item._id}>
+                    {item.menu_item_id?.item_name || 'Unknown Item'} - Quantity: {item.quantity}
+                  </p>
+                ))
+              ) : (
+                <p>No items in this order</p>
+              )}
+            </div>
+          ))
+      ) : (
+        <p>No past orders available.</p>
+      )}
+    </div>
+  </div>
+)}
 
-          {(activeSection === 'orders' || activeSection === 'reviews' || activeSection === 'promotions') && (
+{activeSection === 'cash-account' && (
+  <div className="section">
+    <h2>Cash Account</h2>
+
+    {cashAccount.length > 0 ? (
+      <div className="cash-account-receipt">
+        <table className="cash-account-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Item Name</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cashAccount.map((item, index) => (
+              <tr key={index}>
+                <td>{item.orderId}</td>
+                <td>{item.name}</td>
+                <td>${item.price.toFixed(2)}</td>
+                <td>{item.quantity}</td>
+                <td>${(item.price * item.quantity).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="cash-account-total">
+          <h3>Total Cash: ${totalCash.toFixed(2)}</h3>
+        </div>
+      </div>
+    ) : (
+      <p>No completed orders yet.</p>
+    )}
+  </div>
+)}
+
+
+
+          {(activeSection === 'reviews' || activeSection === 'promotions') && (
             <div className="section">
               <h2>Under Construction</h2>
               <p>This section is still under construction. Please check back later!</p>
@@ -353,22 +490,28 @@ const MerchantHome = () => {
           )}
           <h4>Change Order Status:</h4>
           <button
+            onClick={() => handleStatusChange('Accepted')}
+            className="edit-btn"
+          >
+            Accepted
+          </button>
+          <button
             onClick={() => handleStatusChange('In Progress')}
             className="edit-btn"
           >
             In Progress
           </button>
           <button
-            onClick={() => handleStatusChange('Waiting for Dasher')}
+            onClick={() => handleStatusChange('Completed')}
             className="edit-btn"
           >
-            Waiting for Dasher
+            Completed
           </button>
           <button
-            onClick={() => handleStatusChange('Given to Dasher')}
+            onClick={() => handleStatusChange('Cancelled')}
             className="edit-btn"
           >
-            Given to Dasher
+            Cancelled
           </button>
           <button
             onClick={() => setOrderModalOpen(false)}
@@ -412,24 +555,7 @@ const MerchantHome = () => {
                   onChange={handleInputChange}
                 />
               </div>
-              <div className="form-group">
-                <label>Current Password:</label>
-                <input
-                  type= "password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
-              </div>
-              <div className="form-group">
-                <label>New Password:</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-              </div>
-              {passwordError && <p className="error-message">{passwordError}</p>}
-
+              
               <div className="form-group">
                 <label>Phone Number:</label>
                 <input
@@ -459,9 +585,6 @@ const MerchantHome = () => {
               <button type="button" onClick={handleEditSubmit}>
                 Save Changes
               </button>
-              <button type="button" onClick={handlePasswordChange}>
-                Change Password
-              </button>
               <button onClick={() => setEditModalOpen(false)}>Cancel</button>
             </form>
           </div>
@@ -479,10 +602,44 @@ const MerchantHome = () => {
         </div>
       )}
 
+      {/* Change Password Modal */}
+{changePasswordModalOpen && (
+  <div className="modal">
+    <div className="modal-content">
+      <h3>Change Password</h3>
+      <form onSubmit={(e) => e.preventDefault()}>
+        <div className="form-group">
+          <label>Current Password:</label>
+          <input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
+        </div>
+        <div className="form-group">
+          <label>New Password:</label>
+          <input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+        </div>
+        {passwordError && <p className="error-message">{passwordError}</p>}
+        <button type="button" onClick={handlePasswordChange}>
+          Submit
+        </button>
+        <button onClick={() => setChangePasswordModalOpen(false)}>Cancel</button>
+      </form>
+    </div>
+  </div>
+)}
+
       <Footer />
     </div>
   );
 };
+
+
 
 const Sidebar = ({ handleMenuClick }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -535,7 +692,11 @@ const Sidebar = ({ handleMenuClick }) => {
         >
           Profile
         </li>
-        <li>Cash Account</li>
+        <li
+        className={activeSection === 'cash-account' ? 'active' : ''}
+        onClick={() => handleClick('cash-account')}
+        >
+          Cash Account</li>
         <li>Help</li>
         <li>Sign Out</li>
       </ul>

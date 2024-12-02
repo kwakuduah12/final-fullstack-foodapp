@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Menu.css';
-import { FaPlus } from 'react-icons/fa';
-import FoodCard from './FoodCard'; // Import FoodCard component
+import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa'; // Import FaTrash for the delete icon
 
 const Menu = () => {
   const [showAddFoodPopup, setShowAddFoodPopup] = useState(false);
@@ -37,6 +36,13 @@ const Menu = () => {
   };
 
   const handleAddFoodClick = () => {
+    setFoodData({
+      item_name: '',
+      description: '',
+      price: '',
+      category: '',
+      available: false,
+    });
     setShowAddFoodPopup(true);
   };
 
@@ -63,7 +69,7 @@ const Menu = () => {
         },
         body: JSON.stringify(foodData),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         console.log('Food item added successfully:', data);
@@ -74,6 +80,54 @@ const Menu = () => {
       }
     } catch (error) {
       console.error('Error adding food item:', error);
+    }
+  };
+
+  const handleEditFood = async (updatedFood) => {
+    console.log('Updated Food:', updatedFood); // Debugging: Check the data being sent
+
+    try {
+      const response = await fetch(`http://localhost:4000/menu/${updatedFood._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(updatedFood),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Food item updated successfully:', data); // Debugging: Log backend response
+        fetchAvailableFoods(); // Refresh the food list
+        setShowAddFoodPopup(false); // Close popup
+      } else {
+        const errorData = await response.json();
+        console.error('Failed to update food item:', errorData.message);
+      }
+    } catch (error) {
+      console.error('Error updating food item:', error);
+    }
+  };
+
+  const handleDeleteFood = async (foodId) => {
+    try {
+      const response = await fetch(`http://localhost:4000/menu/${foodId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Food item deleted successfully:', data);
+        fetchAvailableFoods(); // Refresh the list after deletion
+      } else {
+        console.error('Failed to delete food item');
+      }
+    } catch (error) {
+      console.error('Error deleting food item:', error);
     }
   };
 
@@ -89,16 +143,51 @@ const Menu = () => {
       </div>
 
       <div className="food-list">
-        {foods.map(food => (
-          <FoodCard key={food._id} food={food} onEdit={() => {}} /> // Pass props to FoodCard
+        {foods.map((food) => (
+          <div key={food._id} className="food-card">
+            <img src={food.image || 'path/to/default-image.jpg'} alt="Food" className="food-image" />
+            <div className="food-info">
+              <h3>
+                {food.item_name}{' '}
+                <FaEdit 
+                  className="edit-icon" 
+                  onClick={() => {
+                    setFoodData(food); // Populate the form with the food's current data
+                    setShowAddFoodPopup(true); // Show popup for editing
+                  }} 
+                />
+                <FaTrash 
+                  className="delete-icon" // Add a delete icon
+                  onClick={() => handleDeleteFood(food._id)} // Call delete function with the food ID
+                  style={{ marginLeft: '10px', cursor: 'pointer', color: 'black' }}
+                />
+              </h3>
+              <p>{food.description}</p>
+              <p>Category: {food.category}</p>
+              <p>Price: ${food.price}</p>
+              <p>{food.available ? 'In Stock' : 'Out of Stock'}</p>
+            </div>
+          </div>
         ))}
       </div>
 
       {showAddFoodPopup && (
         <div className="popup">
           <div className="popup-content">
-            <h3>Add New Food</h3>
-            <form onSubmit={handleAddFoodSubmit}>
+              <button className="close-popup" onClick={handleClosePopup}>
+                &times;
+              </button>
+            <h3>{foodData._id ? 'Edit Food' : 'Add New Food'}</h3>
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (foodData._id) {
+                  handleEditFood(foodData); // Update existing food
+                } else {
+                  handleAddFoodSubmit(e); // Add new food
+                }
+              }}
+            >
               <input 
                 type="text" 
                 name="item_name" 
@@ -146,8 +235,9 @@ const Menu = () => {
                 /> 
               </div>
               <div className="popup-buttons">
-                <button type="submit" className="add-food-button">Add Food</button>
-                <button type="button" className="cancel-button" onClick={handleClosePopup}>Cancel</button>
+                <button type="submit" className="add-food-button">
+                  {foodData._id ? 'Save Changes' : 'Add Food'}
+                </button>
               </div>
             </form>
           </div>
