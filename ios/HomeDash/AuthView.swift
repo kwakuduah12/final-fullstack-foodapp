@@ -11,6 +11,67 @@ extension Color {
         )
     }
 }
+//func signup(
+//    name: String,
+//    email: String,
+//    password: String,
+//    confirmPassword: String,
+//    isMerchant: Bool,
+//    storeName: String?,
+//    address: String?,
+//    phoneNumber: String?,
+//    storeType: String?,
+//    completion: @escaping (Result<Bool, Error>) -> Void
+//) {
+//    let endpoint = isMerchant ? "http://localhost:4000/merchants/signup" : "http://localhost:4000/user/signup"
+//    guard let url = URL(string: endpoint) else {
+//        completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+//        return
+//    }
+//
+//    var request = URLRequest(url: url)
+//    request.httpMethod = "POST"
+//    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//
+//    var body: [String: Any] = [
+//        "name": name,
+//        "email": email,
+//        "password": password,
+//        "confirmPassword": confirmPassword
+//    ]
+//
+//    if isMerchant {
+//        guard let storeName = storeName, let address = address, let phoneNumber = phoneNumber, let storeType = storeType else {
+//            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Missing merchant fields"])))
+//            return
+//        }
+//        body["store_name"] = storeName
+//        body["address"] = address
+//        body["phone_number"] = phoneNumber
+//        body["store_type"] = storeType
+//    }
+//
+//    do {
+//        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+//    } catch {
+//        completion(.failure(error))
+//        return
+//    }
+//
+//    URLSession.shared.dataTask(with: request) { data, response, error in
+//        if let error = error {
+//            completion(.failure(error))
+//            return
+//        }
+//
+//        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+//            completion(.success(false))
+//            return
+//        }
+//
+//        completion(.success(true))
+//    }.resume()
+//}
 func signup(
     name: String,
     email: String,
@@ -28,18 +89,18 @@ func signup(
         completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
         return
     }
-
+    
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
+    
     var body: [String: Any] = [
         "name": name,
         "email": email,
         "password": password,
         "confirmPassword": confirmPassword
     ]
-
+    
     if isMerchant {
         guard let storeName = storeName, let address = address, let phoneNumber = phoneNumber, let storeType = storeType else {
             completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Missing merchant fields"])))
@@ -50,71 +111,80 @@ func signup(
         body["phone_number"] = phoneNumber
         body["store_type"] = storeType
     }
-
+    
     do {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
     } catch {
         completion(.failure(error))
         return
     }
-
+    
     URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             completion(.failure(error))
             return
         }
-
+        
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             completion(.success(false))
             return
         }
-
+        
         completion(.success(true))
     }.resume()
 }
+
 func login(
     email: String,
     password: String,
     isMerchant: Bool,
-    completion: @escaping (Result<String, Error>) -> Void
+    completion: @escaping (Result<Void, Error>) -> Void
 ) {
     let endpoint = isMerchant ? "http://localhost:4000/merchant/login" : "http://localhost:4000/user/login"
     guard let url = URL(string: endpoint) else {
         completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
         return
     }
-    
+
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    
+
     let body: [String: Any] = [
         "email": email,
         "password": password
     ]
-    
+
     do {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
     } catch {
         completion(.failure(error))
         return
     }
-    
+
     URLSession.shared.dataTask(with: request) { data, response, error in
         if let error = error {
             completion(.failure(error))
             return
         }
-        
+
         guard let data = data,
               let json = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
               let token = json["token"] as? String else {
             completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Invalid login response"])))
             return
         }
-        
-        completion(.success(token))
+
+        DispatchQueue.main.async {
+            @AppStorage("authToken") var authToken: String?
+            @AppStorage("userRole") var userRole: String?
+            authToken = token
+            userRole = isMerchant ? "Merchant" : "User"
+            completion(.success(()))
+        }
     }.resume()
+}
+
     // ProfileView State Object
     struct Profile: Codable {
         var userRole: String
@@ -162,8 +232,29 @@ func login(
                             .padding(.bottom, 30)
                         
                         VStack(spacing: 20) {
-                            if !isLoginMode {
-                                TextField("Name", text: $name)
+                            if !isLoginMode && isMerchant {
+                            // Merchant-Specific Fields
+                                TextField("Store Name", text: $storeName)
+                                    .autocapitalization(.none)
+                                    .disableAutocorrection(true)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(10)
+                                        
+                                TextField("Address", text: $address)
+                                    .autocapitalization(.none)
+                                    .disableAutocorrection(true)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(10)
+                                        
+                                TextField("Phone Number", text: $phoneNumber)
+                                    .keyboardType(.phonePad)
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(10)
+                                        
+                                TextField("Store Type", text: $storeType)
                                     .autocapitalization(.none)
                                     .disableAutocorrection(true)
                                     .padding()
@@ -225,12 +316,12 @@ func login(
                 }
                 .navigationBarBackButtonHidden(true)
                 .navigationDestination(isPresented: .constant(isAuthenticated)) {
-                    if let profileData = profileData,
-                       let profile = try? JSONDecoder().decode(Profile.self, from: profileData) {
+//                    if let profileData = profileData,
+//                       let profile = try? JSONDecoder().decode(Profile.self, from: profileData) {
                         ProfileView()
-                    } else {
-                        ContentView()
-                    }
+//                    } else {
+//                        ContentView()
+//                    }
                 }
             }
         }
@@ -241,9 +332,10 @@ func login(
                     DispatchQueue.main.async {
                         switch result {
                         case .success(let token):
+                            print("Login successful")
                             isAuthenticated = true
                             userRole = isMerchant ? "Merchant" : "User"
-                            fetchProfile(token: token) // Fetch profile data
+                            // fetchProfile(token: token) // Fetch profile data
                         case .failure(let error):
                             print("Login error: \(error.localizedDescription)")
                         }
@@ -297,5 +389,5 @@ func login(
         static var previews: some View {
             AuthView()
         }
-    }
 }
+

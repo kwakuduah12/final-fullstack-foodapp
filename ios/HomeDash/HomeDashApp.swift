@@ -9,7 +9,7 @@ import SwiftUI
 struct HomeDash: App {
     var body: some Scene {
         WindowGroup {
-            RootView() // Start with RootView
+            ContentView() // Start with RootView
         }
     }
 }
