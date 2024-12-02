@@ -198,3 +198,4 @@ const Footer = () => {
 };
 
 export default MerchantHome;
+

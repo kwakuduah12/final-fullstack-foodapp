@@ -1,5 +1,5 @@
 import React from 'react';
-import Sidebar from './Sidebar';
+// import Sidebar from './Sidebar';
 import HeaderHome from './HeaderHome';
 import '../Styles/Home.css';
 
@@ -8,7 +8,7 @@ const HomePage = () => {
     <div className="home-page">
       <HeaderHome />
       <div className="main-container">
-        <Sidebar />
+        {/* <Sidebar /> */}
         <div className="main-content">
           {/* You can add your main content here */}
         </div>

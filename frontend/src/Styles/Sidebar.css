@@ -34,4 +34,41 @@
 
 .sidebar-menu li svg, .sidebar-bottom-menu li svg {
     margin-right: 10px;
+} */
+
+.sidebar {
+    width: 200px; 
+    background-color: white; 
+    padding: 20px; 
+    display: flex;
+    flex-direction: column;
+    height: 100vh; 
+    border-right: 1px solid #dee2e6; 
+}
+
+.divider {
+    border: none; 
+    border-top: 1px solid #dee2e6; 
+    margin: 15px 0;
+}
+
+.sidebar-menu, .sidebar-bottom-menu {
+    list-style: none; 
+    padding: 0;
+}
+
+.sidebar-menu li, .sidebar-bottom-menu li {
+    padding: 10px 15px; 
+    display: flex;
+    align-items: center; 
+    cursor: pointer; 
+}
+
+.sidebar-menu li:hover, .sidebar-bottom-menu li:hover {
+    background-color: #ee9211; 
+    border-radius: 20px;
+}
+
+.sidebar-menu li svg, .sidebar-bottom-menu li svg {
+    margin-right: 10px;
 }

@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
         if (token) {
             try {
                 const decoded = jwtDecode(token);
-                return { id: decoded.id, role: decoded.role }; // Basic info from token
+                return { id: decoded.id, role: decoded.role }; 
             } catch (error) {
                 console.error("Failed to decode token:", error);
                 return null;
@@ -18,13 +18,12 @@ export const AuthProvider = ({ children }) => {
         return null;
     });
 
-    // Fetch full user profile from the server, with endpoint based on role
     const fetchUserProfile = async () => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
-                const decoded = jwtDecode(token); // Decode token to get role
-                const endpoint = decoded.role === 'Merchant' ? 'merchant/profile' : 'user/profile'; // Dynamic endpoint
+                const decoded = jwtDecode(token); 
+                const endpoint = decoded.role === 'Merchant' ? 'merchant/profile' : 'user/profile'; 
                 
                 const response = await fetch(`http://localhost:4000/${endpoint}`, {
                     method: 'GET',
@@ -38,7 +37,6 @@ export const AuthProvider = ({ children }) => {
                     const data = await response.json();
                     console.log("Fetched User Profile:", data.data);
 
-                    // Merge profile data with role
                     setUserInfo({
                         ...data.data,
                         role: decoded.role
@@ -53,18 +51,17 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        // Fetch user profile data on initial load if token is present
         const token = localStorage.getItem('token');
-        if (token && !userInfo?.name) {  // Only fetch if no profile data
+        if (token && !userInfo?.name) {  
             fetchUserProfile();
         }
-    }, []); // Run only once on mount
+    }, [userInfo?.name]); 
 
     const login = (token) => {
         localStorage.setItem('token', token);
         const decoded = jwtDecode(token);
         setUserInfo({ id: decoded.id, role: decoded.role });
-        fetchUserProfile(); // Fetch full profile after login
+        fetchUserProfile(); 
     };
 
     const logout = () => {
