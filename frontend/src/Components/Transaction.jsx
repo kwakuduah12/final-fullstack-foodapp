@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 
 const Transaction = () => {
-  const [balance, setBalance] = useState(0); // Wallet balance
-  const [transactions, setTransactions] = useState([]); // Transaction history
-  const [amount, setAmount] = useState(""); // Amount for adding/deducting money
-  const [merchantId, setMerchantId] = useState(""); // Merchant ID for deductions
-  const [error, setError] = useState(null); // Error state
-  const [loading, setLoading] = useState(true); // Loading state
+  const [balance, setBalance] = useState(0); 
+  const [transactions, setTransactions] = useState([]); 
+  const [amount, setAmount] = useState(""); 
+  const [merchantId, setMerchantId] = useState(""); 
+  const [error, setError] = useState(null); 
+  const [loading, setLoading] = useState(true); 
 
-  // Fetch wallet balance
   const fetchBalance = async () => {
     try {
       const response = await fetch("http://localhost:4000/wallet/balance", {
@@ -30,7 +29,6 @@ const Transaction = () => {
     }
   };
 
-  // Fetch transactions
   const fetchTransactions = async () => {
     try {
       const response = await fetch(
@@ -57,7 +55,6 @@ const Transaction = () => {
     }
   };
 
-  // Add money to wallet
   const addMoney = async () => {
     if (!amount || amount <= 0) {
       alert("Please enter a valid amount.");
@@ -80,15 +77,14 @@ const Transaction = () => {
       }
 
       const data = await response.json();
-      setBalance(data.balance); // Update balance
-      alert(data.message); // Show success message
-      setAmount(""); // Clear amount input
+      setBalance(data.balance); 
+      alert(data.message); 
+      setAmount(""); 
     } catch (err) {
       alert(err.message);
     }
   };
 
-  // Deduct money from wallet
   const deductMoney = async () => {
     if (!amount || amount <= 0 || !merchantId) {
       alert("Please enter a valid amount and merchant ID.");
@@ -117,26 +113,24 @@ const Transaction = () => {
       }
 
       const data = await response.json();
-      setBalance(data.balance); // Update balance
-      alert(data.message); // Show success message
-      setAmount(""); // Clear amount input
-      setMerchantId(""); // Clear merchant ID input
+      setBalance(data.balance); 
+      alert(data.message); 
+      setAmount(""); 
+      setMerchantId(""); 
     } catch (err) {
       alert(err.message);
     }
   };
 
-  // Fetch wallet balance and transactions on component mount
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Ensure loading state is set
+      setLoading(true); 
       await fetchBalance();
       await fetchTransactions();
     };
     fetchData();
   }, []);
 
-  // Render loading or error
   if (loading) {
     return <div>Loading...</div>;
   }

@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { FaSearch, FaMapMarkerAlt, FaBell, FaShoppingCart } from 'react-icons/fa';
 import '../Styles/HeaderHome.css';
 import { useAuth } from './userContext';
-import { Link } from 'react-router-dom'; // Import Link for navigation
-import Cart from './Cart'; // Import the Cart component if using modal functionality
+import { Link } from 'react-router-dom';
+import Cart from './Cart'; 
 
 const HeaderHome = () => {
   const { userInfo } = useAuth();
-  const [isCartOpen, setIsCartOpen] = useState(false); // State to toggle cart modal
+  const [isCartOpen, setIsCartOpen] = useState(false); 
 
   return (
     <header className="header-home">
@@ -31,16 +31,13 @@ const HeaderHome = () => {
       </div>
       <div className="header-right">
         <FaBell className="icon" />
-        {/* Option A: Navigation */}
+    
         <Link to="/cart">
           <FaShoppingCart className="icon" />
         </Link>
 
-        {/* Option B: Modal (Uncomment if needed) */}
-        {/* <FaShoppingCart className="icon" onClick={() => setIsCartOpen(true)} /> */}
       </div>
 
-      {/* Option B: Render Cart Modal */}
       {isCartOpen && (
         <div className="cart-modal">
           <div className="cart-overlay" onClick={() => setIsCartOpen(false)}></div>
