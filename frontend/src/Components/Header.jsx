@@ -9,7 +9,7 @@ const Header = () => {
   const [isSignUpPopupOpen, setSignUpPopupOpen] = useState(false);
   const [isForgotPasswordPopupOpen, setForgotPasswordPopupOpen] = useState(false);
   const [selectedRole, setSelectedRole] = useState('User'); // Add state to track selected role
-  const { userInfo, login, logout } = useAuth(); // Access userInfo, login, and logout from context
+  const { login } = useAuth(); // Access login from context
   const navigate = useNavigate();
 
   const toggleSignInPopup = () => {
@@ -65,7 +65,6 @@ const Header = () => {
 
     toggleSignInPopup();
   };
-  
 
   const handleSignUpSubmit = async (e) => {
     e.preventDefault();
@@ -93,11 +92,6 @@ const Header = () => {
     }
 
     toggleSignUpPopup();
-  };
-
-  const handleLogout = () => {
-    logout(); // Use logout from context to clear authentication
-    navigate('/');
   };
 
   const handleForgotPasswordSubmit = (e) => {
@@ -180,7 +174,7 @@ const Header = () => {
         </div>
       )}
 
-{isSignUpPopupOpen && (
+      {isSignUpPopupOpen && (
         <div className="popup">
           <div className="popup-content">
             <span className="close" onClick={toggleSignUpPopup}>&times;</span>

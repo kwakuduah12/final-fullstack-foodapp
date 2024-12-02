@@ -1,5 +1,8 @@
 package com.example.homedasher_prod
 
+import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
@@ -10,13 +13,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,30 +38,74 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.*
+
 
 
 @Composable
-fun HomeScreen() {
-    Box(
-        modifier = Modifier.verticalScroll(rememberScrollState())
-    ) {
-        Image(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(0.dp, (-30).dp),
-            contentDescription = "Header",
-            painter = painterResource(id = R.drawable.bg_main),
-            contentScale = ContentScale.FillWidth
-        )
-        Column {
-            AppBar()
-            Content()
+fun HomeScreen(
+    context: Context,
+    userId: String,
+    navController: NavController,
+    viewModel: MerchantViewModel = viewModel()
+) {
+    LaunchedEffect(Unit) {
+        viewModel.fetchMerchants(context)
+    }
+
+    if (viewModel.isLoading) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(48.dp)
+            )
+        }
+    } else if (!viewModel.errorMessage.isNullOrEmpty()) {
+        Text(text = viewModel.errorMessage ?: "", modifier = Modifier.fillMaxSize())
+    } else {
+        Box(
+            modifier = Modifier.verticalScroll(rememberScrollState())
+        ) {
+            Image(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .offset(0.dp, (-30).dp),
+                contentDescription = "Header",
+                painter = painterResource(id = R.drawable.bg_main),
+                contentScale = ContentScale.FillWidth
+            )
+            Column {
+                AppBar(context, userId, navController)
+                Content(viewModel.merchants, navController)
+            }
         }
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar() {
+fun AppBar(context: Context, userId: String, navController: NavController) {
+    val coroutineScope = rememberCoroutineScope()
+    var isCartNotEmpty by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            try {
+                val cart = getCart(context, userId)
+                isCartNotEmpty = cart != null && cart.items.isNotEmpty()
+            } catch (e: Exception) {
+                Log.e("AppBar", "Error retrieving cart", e)
+            }
+        }
+    }
+
     Row(
         Modifier
             .padding(16.dp)
@@ -63,9 +116,9 @@ fun AppBar() {
         TextField(
             value = "",
             onValueChange = {},
-            label = { Text(text = "Search Restaurants...", fontSize = 12.sp)},
+            label = { Text(text = "Search Restaurants...", fontSize = 12.sp) },
             singleLine = true,
-            leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = "Search")},
+            leadingIcon = { Icon(imageVector = Icons.Rounded.Search, contentDescription = "Search") },
             colors = TextFieldDefaults.textFieldColors(
                 containerColor = Color.White,
                 focusedIndicatorColor = Color.Transparent,
@@ -77,8 +130,44 @@ fun AppBar() {
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.width(8.dp))
-        IconButton(onClick = {}) {
-            Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "Favorite", tint = Color.White)
+        IconButton(onClick = {
+            coroutineScope.launch {
+                try {
+                    val cart = getCart(context, userId)
+                    if (cart != null && isCartNotEmpty) {
+                        navController.navigate("userCartItems/${userId}")
+                    } else {
+                        Toast.makeText(context, "Your cart is empty", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Log.e("AppBar", "Error retrieving cart", e)
+                }
+            }
+        }) {
+            Box {
+                Icon(
+                    imageVector = Icons.Outlined.ShoppingCart,
+                    contentDescription = "Cart",
+                    tint = Color.White
+                )
+                if (isCartNotEmpty) {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(Color.Red, shape = CircleShape)
+                            .align(Alignment.TopEnd)
+                    )
+                }
+            }
+        }
+        IconButton(onClick = {
+            performLogout(context)
+            Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+            navController.navigate("login") {
+                popUpTo("home") { inclusive = true }
+            }
+        }) {
+            Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = "Logout", tint = Color.White)
         }
         IconButton(onClick = {}) {
             Icon(imageVector = Icons.Outlined.Notifications, contentDescription = "Notification", tint = Color.White)
@@ -87,12 +176,14 @@ fun AppBar() {
 }
 
 @Composable
-fun Content() {
+fun Content(merchants: List<Merchant>, navController: NavController) {
     Header()
     Spacer(modifier = Modifier.height(16.dp))
     Promotions()
     Spacer(modifier = Modifier.height(16.dp))
-    CategorySection()
+    if (merchants.isNotEmpty()) {
+        CategorySection(merchants = merchants, navController = navController)
+    }
     Spacer(modifier = Modifier.height(16.dp))
     BestSellerSection()
 }
@@ -251,12 +342,20 @@ fun PropotionItem(
     }
 }
 
-
 @Composable
-fun CategorySection() {
+fun CategorySection(merchants: List<Merchant>, navController: NavController) {
+    val storeTypeImages = mapOf(
+        "Asian" to R.drawable.asian,
+        "Italian" to R.drawable.italian,
+        "African" to R.drawable.jollof,
+        "Mexican" to R.drawable.tacos,
+        "Grocery" to R.drawable.ic_cheese
+    )
+
+    val storeTypes = merchants.map { it.storeType }.distinct()
+
     Column(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -271,28 +370,17 @@ fun CategorySection() {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(20.dp) // Add spacing here
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            CategoryButton(
-                text = "Asian",
-                icon = painterResource(id = R.drawable.asian),
-                backgroundColor = Color(0xffFEF4E7)
-            )
-            CategoryButton(
-                text = "Italian",
-                icon = painterResource(id = R.drawable.italian),
-                backgroundColor = Color(0xffF6FBF3)
-            )
-            CategoryButton(
-                text = "African",
-                icon = painterResource(id = R.drawable.jollof),
-                backgroundColor = Color(0xffFFFBF3)
-            )
-            CategoryButton(
-                text = "Mexican",
-                icon = painterResource(id = R.drawable.tacos),
-                backgroundColor = Color(0xffF6E6E9)
-            )
+            storeTypes.forEach { storeType ->
+                val imageRes = storeTypeImages[storeType] ?: R.drawable.bg_main
+                CategoryButton(
+                    text = storeType,
+                    icon = painterResource(id = imageRes),
+                    backgroundColor = Color(0xffFEF4E7),
+                    onClick = { navController.navigate("category/$storeType") }
+                )
+            }
         }
     }
 }
@@ -301,12 +389,13 @@ fun CategorySection() {
 fun CategoryButton(
     text: String = "",
     icon: Painter,
-    backgroundColor: Color
+    backgroundColor: Color,
+    onClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .width(72.dp)
-            .clickable { }
+            .clickable { onClick() }
     ) {
         Box(
             modifier = Modifier
@@ -442,5 +531,10 @@ fun BestSellerItem(
 @Composable
 @Preview(showSystemUi = true, showBackground = true)
 fun PrevScreen() {
-        HomeScreen()
+    val userId = "sampleUserId"
+    HomeScreen(
+        context = LocalContext.current,
+        userId = userId,
+        navController = rememberNavController()
+    )
 }

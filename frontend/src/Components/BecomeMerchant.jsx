@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import '../Styles/BecomeMerchant.css';
-import LoginPopup from './LoginPopUp';
+// import LoginPopup from './LoginPopUp';
+import LoginPopup from './LoginPopup'; // Import LoginPopup component
 
 const BecomeMerchant = () => {
-  const [storeType, setStoreType] = useState('');
+  // const [storeType, setStoreType] = useState('');
   const [registered, setRegistered] = useState(false);
   const [error, setError] = useState(''); // State to store error message
   const [formData, setFormData] = useState({
@@ -142,3 +143,4 @@ const BecomeMerchant = () => {
 };
 
 export default BecomeMerchant;
+
