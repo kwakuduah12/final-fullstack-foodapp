@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Cart = require('../models/cart');
-const Menu = require('../models/menu');  // to fetch item details
-const authenticate = require('../middlewares/authMiddleWares'); // assuming you have JWT authentication
+const Menu = require('../models/menu');  
+const authenticate = require('../middlewares/authMiddleWares'); 
 
-// Add item to cart
+
 router.post('/add', authenticate(['User']), async (req, res) => {
     const {menu_item_id, quantity } = req.body;
     const user_id = req.user.id;
@@ -18,7 +18,7 @@ router.post('/add', authenticate(['User']), async (req, res) => {
         }
 
         if (!cart) {
-            // Create a new cart if the user does not have one
+            
             cart = new Cart({
                 user_id,
                 items: [{ menu_item_id, quantity }],
@@ -77,7 +77,7 @@ router.delete('/remove', authenticate(['User']), async (req, res) => {
             return res.status(404).json({ message: 'Item not found in cart' });
         }
 
-        // Update total price and remove item
+        
         cart.total_price -= cart.items[itemIndex].quantity * cart.items[itemIndex].menu_item_id.price;
         cart.items.splice(itemIndex, 1);
 
@@ -89,7 +89,7 @@ router.delete('/remove', authenticate(['User']), async (req, res) => {
     }
 });
 
-// Clear the cart
+
 router.delete('/clear', authenticate(['User']), async (req, res) => {
     try {
         const cart = await Cart.findOne({ user_id: req.user.id });

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../Styles/BecomeMerchant.css';
-// import MerchantDashboard from './MerchantHome';
+// import LoginPopup from './LoginPopUp';
 import LoginPopup from './LoginPopup'; // Import LoginPopup component
 
 const BecomeMerchant = () => {
