@@ -11,67 +11,7 @@ extension Color {
         )
     }
 }
-//func signup(
-//    name: String,
-//    email: String,
-//    password: String,
-//    confirmPassword: String,
-//    isMerchant: Bool,
-//    storeName: String?,
-//    address: String?,
-//    phoneNumber: String?,
-//    storeType: String?,
-//    completion: @escaping (Result<Bool, Error>) -> Void
-//) {
-//    let endpoint = isMerchant ? "http://localhost:4000/merchants/signup" : "http://localhost:4000/user/signup"
-//    guard let url = URL(string: endpoint) else {
-//        completion(.failure(NSError(domain: "", code: 404, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
-//        return
-//    }
-//
-//    var request = URLRequest(url: url)
-//    request.httpMethod = "POST"
-//    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//
-//    var body: [String: Any] = [
-//        "name": name,
-//        "email": email,
-//        "password": password,
-//        "confirmPassword": confirmPassword
-//    ]
-//
-//    if isMerchant {
-//        guard let storeName = storeName, let address = address, let phoneNumber = phoneNumber, let storeType = storeType else {
-//            completion(.failure(NSError(domain: "", code: 400, userInfo: [NSLocalizedDescriptionKey: "Missing merchant fields"])))
-//            return
-//        }
-//        body["store_name"] = storeName
-//        body["address"] = address
-//        body["phone_number"] = phoneNumber
-//        body["store_type"] = storeType
-//    }
-//
-//    do {
-//        request.httpBody = try JSONSerialization.data(withJSONObject: body)
-//    } catch {
-//        completion(.failure(error))
-//        return
-//    }
-//
-//    URLSession.shared.dataTask(with: request) { data, response, error in
-//        if let error = error {
-//            completion(.failure(error))
-//            return
-//        }
-//
-//        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-//            completion(.success(false))
-//            return
-//        }
-//
-//        completion(.success(true))
-//    }.resume()
-//}
+
 func signup(
     name: String,
     email: String,
