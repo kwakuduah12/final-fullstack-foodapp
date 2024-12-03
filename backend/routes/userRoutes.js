@@ -5,10 +5,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const authenticate = require("../middlewares/authMiddleWares");
 
-// JWT Secret Key
+
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// User Signup (no token generation)
+
 router.post('/signup', (req, res) => {
     let { name, email, password, confirmPassword } = req.body;
     name = name.trim();
@@ -38,7 +38,7 @@ router.post('/signup', (req, res) => {
                     name,
                     email,
                     password: hashedPassword,
-                    role: 'User' // Set default role as 'User'
+                    role: 'User' 
                 });
 
                 newUser.save().then(user => {
@@ -61,7 +61,7 @@ router.post('/signup', (req, res) => {
     });
 });
 
-// User Login with JWT token generation
+
 router.post('/login', (req, res) => {
     let { email, password } = req.body;
     email = email.trim();
@@ -80,11 +80,11 @@ router.post('/login', (req, res) => {
             if (!result) {
                 return res.status(401).json({ message: 'Invalid credentials' });
             } else {
-                // Generate JWT token with user role
+                
                 const token = jwt.sign(
-                    { id: user._id, role: "User" }, // Include role in token
+                    { id: user._id, role: "User" }, 
                     JWT_SECRET,
-                    { expiresIn: '1h' } // Token expiration
+                    { expiresIn: '1h' } 
                 );
                 return res.status(200).json({ message: 'Login successful', token });
             }
