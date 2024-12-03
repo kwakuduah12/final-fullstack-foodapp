@@ -14,14 +14,16 @@ const restaurantRoutes = require('./routes/restaurantRoutes');
 const menuRoutes = require('./routes/menuRoutes');
 const merchantRoutes = require('./routes/merchantsRoutes');
 const orderRoutes = require('./routes/orderRoutes'); 
-const CartRoutes = require('./routes/cartRoutes');  
-const walletRoutes = require('./routes/walletRoutes');
+const CartRoutes = require('./routes/cartRoutes'); 
+const paymentRoutes = require('./routes/paymentRoutes');  
+
 
 
 app.use(cors());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.json());
 
 
 app.use('/user', UserRoutes);
@@ -30,7 +32,29 @@ app.use('/menu', menuRoutes);
 app.use('/merchant', merchantRoutes);
 app.use('/order', orderRoutes);
 app.use('/cart', CartRoutes);
-app.use('/wallet', walletRoutes);
+app.use('/payment', paymentRoutes);
+
+
+
+// // Add to server.js
+
+// const jwt = require('jsonwebtoken');
+
+// // JWT Token generation route
+// app.post('/generate-token', (req, res) => {
+//     const { username } = req.body;
+//     if (!username) {
+//         return res.status(400).json({ error: 'Username is required' });
+//     }
+
+//     // Generate a token
+//     const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+//     res.json({ token });
+// });
+// // used to test the token 
+
+
+
 
 const connectDB = async () => {
     try {
