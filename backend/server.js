@@ -22,6 +22,7 @@ const promotionRoutes = require('./routes/promotionRoutes'); // Import promotion
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.json());
 
 // Mount routes
 app.use('/user', UserRoutes);

@@ -1,211 +1,175 @@
 import SwiftUI
 
-struct LocalMerchant: Identifiable, Decodable {
-    let id: UUID = UUID() // Locally generated UUID for SwiftUI use
-    let storeName: String
-    let address: String
-    let email: String
-    let phoneNumber: String
-    let storeType: String
-    
-    // Map keys from JSON to Swift properties if needed
-    enum CodingKeys: String, CodingKey {
-        case storeName = "store_name"
-        case address
-        case email
-        case phoneNumber = "phone_number"
-        case storeType = "store_type"
-    }
-}
-
 struct MerchantView: View {
-    @State private var merchants: [LocalMerchant] = []
+    @AppStorage("authToken") private var authToken: String?
+    @State private var menuItems: [MenuItem] = []
     @State private var isLoading: Bool = true
     @State private var errorMessage: String? = nil
+    @State private var isAddMenuPresented: Bool = false
     
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 16) {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
+            VStack {
+                if isLoading {
+                    ProgressView("Loading Menu Items...")
+                } else {
+                    if let errorMessage = errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .padding()
                     } else {
-                        if let errorMessage = errorMessage {
-                            Text(errorMessage)
-                                .foregroundColor(.red)
-                                .font(.headline)
-                        } else {
-                            ForEach(merchants) { merchant in
-                                MerchantItemView(merchant: merchant)
-                                    .padding()
-                                    .background(Color.white)
-                                    .cornerRadius(10)
-                                    .shadow(radius: 3)
+                        ScrollView {
+                            VStack(spacing: 16) {
+                                ForEach(menuItems) { item in
+                                    MenuItemView(menuItem: item, onDelete: deleteMenuItem)
+                                        .padding()
+                                        .background(Color.white)
+                                        .cornerRadius(10)
+                                        .shadow(radius: 3)
+                                }
                             }
+                            .padding()
                         }
                     }
                 }
-                .padding(16)
+                Spacer()
+                Button(action: { isAddMenuPresented = true }) {
+                    Text("Add Menu Item")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding()
+                .sheet(isPresented: $isAddMenuPresented) {
+                    AddMenuItemView(onAdd: fetchMenuItems)
+                }
             }
-            .navigationTitle("Merchant Home")
+            .navigationTitle("Merchant Menu")
             .onAppear {
-                fetchMerchants()
+                fetchMenuItems()
             }
         }
     }
-    
-    private func fetchMerchants() {
-        isLoading = true
-        errorMessage = nil
+    private func fetchMenuItems() {
+        guard let token = authToken else {
+            errorMessage = "User not authenticated."
+            isLoading = false
+            return
+        }
         
-        // Backend API URL
-        guard let url = URL(string: "http://localhost:4000/merchants") else {
+        guard let merchantId = decodeMerchantId(from: token) else {
+            errorMessage = "Invalid token format."
+            isLoading = false
+            return
+        }
+        
+        let endpoint = "http://localhost:4000/menu/merchant/\(merchantId)"
+        guard let url = URL(string: endpoint) else {
             errorMessage = "Invalid backend URL."
             isLoading = false
             return
         }
         
-        // Create a data task to fetch merchants
-        URLSession.shared.dataTask(with: url) { data, response, error in
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        isLoading = true
+        errorMessage = nil
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
             DispatchQueue.main.async {
+                isLoading = false
                 if let error = error {
-                    self.errorMessage = "Error fetching merchants: \(error.localizedDescription)"
-                    self.isLoading = false
-                    return
-                }
-                
-                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    self.errorMessage = "Invalid response from server."
-                    self.isLoading = false
+                    errorMessage = "Error fetching menu items: \(error.localizedDescription)"
                     return
                 }
                 
                 guard let data = data else {
-                    self.errorMessage = "No data received from server."
-                    self.isLoading = false
+                    errorMessage = "No data received from server."
                     return
                 }
                 
                 do {
-                    let decodedMerchants = try JSONDecoder().decode([LocalMerchant].self, from: data)
-                    if decodedMerchants.isEmpty {
-                        self.errorMessage = "No merchants available."
-                    } else {
-                        self.merchants = decodedMerchants
-                    }
+                    // Decode the response
+                    let decodedResponse = try JSONDecoder().decode(MenuResponse.self, from: data)
+                    menuItems = decodedResponse.data // Extract the menu items array
                 } catch {
-                    self.errorMessage = "Failed to decode merchants: \(error.localizedDescription)"
+                    errorMessage = "Failed to decode menu items: \(error.localizedDescription)"
                 }
-                self.isLoading = false
             }
         }.resume()
     }
-}
-
-struct MerchantView_Previews: PreviewProvider {
-    static var previews: some View {
-        MerchantView()
+    
+    private func deleteMenuItem(_ id: String) {
+        guard let token = authToken else {
+            errorMessage = "User not authenticated."
+            return
+        }
+        
+        let endpoint = "http://localhost:4000/menu/\(id)"
+        guard let url = URL(string: endpoint) else {
+            errorMessage = "Invalid backend URL."
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "DELETE"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        URLSession.shared.dataTask(with: request) { _, response, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    errorMessage = "Error deleting menu item: \(error.localizedDescription)"
+                    return
+                }
+                
+                menuItems.removeAll { $0.id == id }
+            }
+        }.resume()
+    }
+    private func decodeMerchantId(from token: String) -> String? {
+        // Split the token to extract the payload
+        let parts = token.split(separator: ".")
+        guard parts.count == 3 else {
+            print("Invalid JWT structure. Token: \(token)")
+            return nil
+        }
+        
+        // Decode the payload (Base64)
+        let base64Payload = String(parts[1])
+        
+        // Add padding to Base64 string if necessary
+        let paddedBase64 = base64Payload.padding(toLength: ((base64Payload.count + 3) / 4) * 4, withPad: "=", startingAt: 0)
+        
+        guard let payloadData = Data(base64Encoded: paddedBase64) else {
+            print("Failed to Base64 decode payload. Token: \(token)")
+            return nil
+        }
+        
+        // Parse the JSON payload
+        do {
+            if let json = try JSONSerialization.jsonObject(with: payloadData, options: []) as? [String: Any],
+               let merchantId = json["id"] as? String {
+                print("Decoded merchant ID: \(merchantId)")
+                return merchantId
+            } else {
+                print("Invalid JSON structure in payload. Data: \(String(data: payloadData, encoding: .utf8) ?? "")")
+            }
+        } catch {
+            print("Failed to parse JSON payload. Error: \(error.localizedDescription)")
+        }
+        
+        return nil
+    }
+    
+    
+    struct MerchantView_Previews: PreviewProvider {
+        static var previews: some View {
+            MerchantView()
+        }
     }
 }
-
-//import SwiftUI
-//
-//struct Merchant: Identifiable {
-//    let id = UUID()
-//    let storeName: String
-//    let address: String
-//    let email: String
-//    let phoneNumber: String
-//    let storeType: String
-//}
-//
-//struct MerchantView: View {
-//    @State private var merchants: [Merchant] = []
-//    @State private var isLoading: Bool = true
-//    @State private var errorMessage: String? = nil
-//    
-//    var body: some View {
-//        NavigationView {
-//            ScrollView {
-//                VStack(spacing: 16) {
-//                    if isLoading {
-//                        ProgressView()
-//                            .progressViewStyle(CircularProgressViewStyle())
-//                    } else {
-//                        if let errorMessage = errorMessage {
-//                            Text(errorMessage)
-//                                .foregroundColor(.red)
-//                                .font(.headline)
-//                        } else {
-//                            ForEach(merchants) { merchant in
-//                                MerchantItemView(merchant: merchant)
-//                                    .padding()
-//                                    .background(Color.white)
-//                                    .cornerRadius(10)
-//                                    .shadow(radius: 3)
-//                            }
-//                        }
-//                    }
-//                }
-//                .padding(16)
-//            }
-//            .navigationTitle("Merchant Home")
-//            .onAppear {
-//                fetchMerchants()
-//            }
-//        }
-//    }
-//    private func fetchMerchants() {
-//        isLoading = true
-//        errorMessage = nil
-//        
-//        // Backend API URL
-//        guard let url = URL(string: "http://localhost:4000/merchants") else {
-//            errorMessage = "Invalid backend URL."
-//            isLoading = false
-//            return
-//        }
-//        
-//        // Create a data task to fetch merchants
-//        URLSession.shared.dataTask(with: url) { data, response, error in
-//            DispatchQueue.main.async {
-//                if let error = error {
-//                    self.errorMessage = "Error fetching merchants: \(error.localizedDescription)"
-//                    self.isLoading = false
-//                    return
-//                }
-//                
-//                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-//                    self.errorMessage = "Invalid response from server."
-//                    self.isLoading = false
-//                    return
-//                }
-//                
-//                guard let data = data else {
-//                    self.errorMessage = "No data received from server."
-//                    self.isLoading = false
-//                    return
-//                }
-//                
-////                do {
-//////                    let decodedMerchants = try JSONDecoder().decode([Merchant].self, from: data)
-////                    if decodedMerchants.isEmpty {
-////                        self.errorMessage = "No merchants available."
-////                    } else {
-////                        self.merchants = decodedMerchants
-////                    }
-////                } catch {
-////                    self.errorMessage = "Failed to decode merchants: \(error.localizedDescription)"
-////                }
-//                self.isLoading = false
-//            }
-//        }.resume()
-//    }
-//}
-//
-//struct MerchantView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        MerchantView()
-//    }
-//}
