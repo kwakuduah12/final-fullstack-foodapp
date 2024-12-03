@@ -1,177 +1,3 @@
-//import SwiftUI
-//import CoreLocation
-//import MapKit
-//
-//struct Promotion: Identifiable {
-//    let id = UUID()
-//    let imageName: String
-//    let title: String
-//    let description: String
-//}
-//
-//struct Notification: Identifiable {
-//    let id = UUID()
-//    let title: String
-//    let description: String
-//    let imageName: String
-//}
-//
-//// ContentView that include s location, promotions, and a map feature
-//struct ContentView: View {
-//    @StateObject private var locationManager = LocationManager()
-//    @State private var searchText = ""
-//    @State private var showMap = false
-//    @State private var showCart: Bool = false
-//    @State private var showNotifications = false
-//    @State private var region = MKCoordinateRegion(
-//        center: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), // Default to San Francisco
-//        span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-//    )
-//    
-//    let promotions = [
-//        Promotion(imageName: "pepperoni", title: "20% Off on Pizza", description: "Order any pizza and get 20% off."),
-//        Promotion(imageName: "burger-drink", title: "Free Drink with Burger", description: "Get a free drink with every burger."),
-//        Promotion(imageName: "taco-tuesday", title: "Taco Tuesday Special", description: "Buy 2 Tacos, get 1 free!")
-//    ]
-//    
-//    var body: some View {
-//        VStack(alignment: .leading) {
-//            // Top Row with Location, Notification, and Cart
-//            HStack {
-//                // Current Location
-//                VStack(alignment: .leading) {
-//                    Text("Current Location")
-//                        .font(.subheadline)
-//                        .foregroundColor(.gray)
-//                    Text(locationManager.city ?? "Locating...")
-//                        .font(.headline)
-//                        .fontWeight(.bold)
-//                        .foregroundColor(Color.blue)
-//                }
-//                Spacer()
-//                
-//                // Notification Bell
-//                Button(action: {
-//                    showNotifications = true // Show notifications when tapped
-//                }) {
-//                    Image(systemName: "bell.fill")
-//                        .font(.title)
-//                        .foregroundColor(.white)
-//                        .padding()
-//                        .background(Circle().fill(Color.orange))
-//                }
-//                .padding(.horizontal)
-//                .sheet(isPresented: $showNotifications) {
-//                    NotificationView() // Present NotificationView when tapped
-//                }
-//                
-//                // Shopping Cart
-//                //                Button(action: {
-//                //                    showCart = true
-//                //                }) {
-//                //                    Image(systemName: "cart.fill")
-//                //                        .font(.title)
-//                //                        .foregroundColor(.white)
-//                //                        .padding()
-//                //                        .background(Circle().fill(Color.green))
-//                //                }
-//                //            }
-//                //            .padding(.horizontal)
-//                NavigationLink(destination: CartView()) {
-//                    Image(systemName: "cart.fill")
-//                        .font(.title)
-//                        .foregroundColor(.white)
-//                        .padding()
-//                        .background(Circle().fill(Color.green))
-//                }
-//                
-//                // Search Bar and Map Icon
-//                HStack {
-//                    // Search bar
-//                    HStack {
-//                        Image(systemName: "magnifyingglass")
-//                        TextField("Search for restaurants or food...", text: $searchText)
-//                            .textFieldStyle(RoundedBorderTextFieldStyle())
-//                    }
-//                    .padding(.horizontal)
-//                    //                NavigationLink(
-//                    //                    destination: CartView(),
-//                    //                    isActive: $showCart // Controls when to show CartView
-//                    //                ) {
-//                    //                    EmptyView() // Hidden link to trigger navigation
-//                    //                }
-//                    
-//                    // Map Icon
-//                    Button(action: {
-//                        showMap.toggle()
-//                    }) {
-//                        Image(systemName: "map.fill")
-//                            .font(.title2)
-//                            .foregroundColor(.white)
-//                            .padding()
-//                            .background(Circle().fill(Color.blue))
-//                    }
-//                    .padding(.trailing)
-//                    .sheet(isPresented: $showMap) {
-//                        MapView(region: $region) // Show the map when the button is tapped
-//                    }
-//                }
-//                .padding(.top, 10)
-//                
-//                // Promotions Section
-//                Text("Promotions You'll Love")
-//                    .font(.headline)
-//                    .padding(.leading, 16)
-//                    .frame(maxWidth: .infinity, alignment: .leading)
-//                
-//                ScrollView(.horizontal, showsIndicators: false) {
-//                    HStack(spacing: 16) {
-//                        ForEach(promotions) { promotion in
-//                            PromotionView(promotion: promotion)
-//                        }
-//                    }
-//                    .padding(.horizontal, 16)
-//                }
-//                .padding(.top, 10)
-//                
-//                // Popular Foods by Country/Region
-//                Text("Popular Foods by Country/Region")
-//                    .font(.headline)
-//                    .fontWeight(.semibold)
-//                    .foregroundColor(.black)
-//                    .padding(.top)
-//                
-//                ScrollView(.horizontal, showsIndicators: false) {
-//                    HStack(spacing: 20) {
-//                        FoodCategoryView(name: "Tacos", imageName: "tacos")
-//                        FoodCategoryView(name: "Jollof", imageName: "jollof")
-//                        FoodCategoryView(name: "Italian", imageName: "italian")
-//                        FoodCategoryView(name: "Asian", imageName: "asian")
-//                    }
-//                }
-//                .padding(.horizontal)
-//                
-//                // Sort by Tags
-//                Text("Sort by")
-//                    .font(.headline)
-//                    .fontWeight(.semibold)
-//                    .foregroundColor(.black)
-//                    .padding(.top)
-//                
-//                ScrollView(.horizontal, showsIndicators: false) {
-//                    HStack(spacing: 10) {
-//                        SortTagView(name: "Price")
-//                        SortTagView(name: "Pickup")
-//                        SortTagView(name: "Deals")
-//                        SortTagView(name: "Ratings")
-//                    }
-//                }
-//                .padding(.horizontal)
-//            }
-//            .padding()
-//            .background(Color.gray.opacity(0.1))
-//        }
-//    }
 import SwiftUI
 import CoreLocation
 import MapKit
@@ -191,8 +17,12 @@ struct Notification: Identifiable {
 }
 
 struct ContentView: View {
+    @AppStorage("authToken") private var authToken: String?
     @StateObject private var locationManager = LocationManager()
     @StateObject private var cartModel = CartModel() // Initialize CartModel
+    @State private var menuItems: [MenuItem] = [] // Store menu items from the merchant
+    @State private var isLoading: Bool = true // Loading state for menu items
+    @State private var errorMessage: String? // Error message for menu items
     @State private var searchText = ""
     @State private var showMap = false
     @State private var showNotifications = false
@@ -274,64 +104,116 @@ struct ContentView: View {
                     }
                 }
                 .padding(.top, 10)
-                
-                // Promotions Section
-                Text("Promotions You'll Love")
+                // Merchant Menu Section
+                Text("Merchant's Menu")
                     .font(.headline)
                     .padding(.leading, 16)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 16) {
-                        ForEach(promotions) { promotion in
-                            PromotionView(promotion: promotion)
+                if isLoading {
+                    ProgressView("Loading menu items...")
+                        .padding()
+                } else if let errorMessage = errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                } else if menuItems.isEmpty {
+                    Text("No items available in the menu.")
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .padding()
+                } else {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        ForEach(menuItems) { item in
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(item.itemName)
+                                    .font(.headline)
+                                Text(item.description ?? "No description available")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("Price: $\(String(format: "%.2f", item.price))")
+                                    .font(.subheadline)
+                                    .foregroundColor(.green)
+                                Divider()
+                            }
+                            .padding()
                         }
                     }
-                    .padding(.horizontal, 16)
+                    .padding(.horizontal)
                 }
-                .padding(.top, 10)
                 
-                // Popular Foods by Country/Region
-                Text("Popular Foods by Country/Region")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.black)
-                    .padding(.top)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 20) {
-                        FoodCategoryView(name: "Tacos", imageName: "tacos")
-                        FoodCategoryView(name: "Jollof", imageName: "jollof")
-                        FoodCategoryView(name: "Italian", imageName: "italian")
-                        FoodCategoryView(name: "Asian", imageName: "asian")
-                    }
-                }
-                .padding(.horizontal)
-                
-                // Sort by Tags
-                Text("Sort by")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.black)
-                    .padding(.top)
-                
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        SortTagView(name: "Price")
-                        SortTagView(name: "Pickup")
-                        SortTagView(name: "Deals")
-                        SortTagView(name: "Ratings")
-                    }
-                }
-                .padding(.horizontal)
+                Spacer()
             }
-            .padding()
-            .background(Color.gray.opacity(0.1))
+            .navigationTitle("Explore Menu")
+            .onAppear {
+                fetchMenuItems()
+            }
         }
-        .environmentObject(cartModel) // Pass CartModel to the environment
+        .environmentObject(cartModel)
     }
-}
-
+    private func fetchMenuItems() {
+        guard let token = authToken else {
+            errorMessage = "User not authenticated."
+            isLoading = false
+            return
+        }
+        
+        // Decode the merchant ID from the token
+        guard let merchantId = decodeMerchantId(from: token) else {
+            errorMessage = "Invalid token format."
+            isLoading = false
+            return
+        }
+        
+        let endpoint = "http://localhost:4000/menu/merchant/\(merchantId)"
+        guard let url = URL(string: endpoint) else {
+            errorMessage = "Invalid backend URL."
+            isLoading = false
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        isLoading = true
+        errorMessage = nil
+        
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            DispatchQueue.main.async {
+                isLoading = false
+                if let error = error {
+                    errorMessage = "Error fetching menu items: \(error.localizedDescription)"
+                    return
+                }
+                
+                guard let data = data else {
+                    errorMessage = "No data received from server."
+                    return
+                }
+                
+                do {
+                    menuItems = try JSONDecoder().decode([MenuItem].self, from: data)
+                } catch {
+                    errorMessage = "Failed to decode menu items: \(error.localizedDescription)"
+                }
+            }
+        }.resume()
+    }
+    
+    // Helper function to decode the merchant ID from the JWT token
+    private func decodeMerchantId(from token: String) -> String? {
+        let parts = token.split(separator: ".")
+        guard parts.count == 3,
+              let payloadData = Data(base64Encoded: String(parts[1])),
+              let json = try? JSONSerialization.jsonObject(with: payloadData, options: []),
+              let dictionary = json as? [String: Any],
+              let merchantId = dictionary["id"] as? String else {
+            return nil
+        }
+        
+        return merchantId
+    }
     // NotificationView to display a list of notifications
     struct NotificationView: View {
         let notifications = [
@@ -490,7 +372,7 @@ struct ContentView: View {
             }
         }
     }
-    
+}
     // Preview
     struct ContentView_Previews: PreviewProvider {
         static var previews: some View {
