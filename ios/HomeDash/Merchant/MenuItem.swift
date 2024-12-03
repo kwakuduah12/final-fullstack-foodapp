@@ -5,30 +5,6 @@ struct MenuResponse: Decodable {
     let data: [MenuItem]
 }
 
-struct MenuItem: Identifiable, Decodable {
-    let id: String // MongoDB ObjectId
-    let merchantId: String // Matches `merchant_id` in backend
-    let itemName: String
-    let description: String?
-    let price: Double
-    let category: String
-    let available: Bool
-    let createdAt: String? // Matches `created_at` in backend
-    let updatedAt: String? // Matches `updated_at` in backend
-
-    enum CodingKeys: String, CodingKey {
-        case id = "_id"
-        case merchantId = "merchant_id"
-        case itemName = "item_name"
-        case description
-        case price
-        case category
-        case available
-        case createdAt = "created_at"
-        case updatedAt = "updated_at"
-    }
-}
-
 struct MenuItemView: View {
     let menuItem: MenuItem
     var onDelete: (String) -> Void // Callback for delete action
