@@ -6,6 +6,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import okhttp3.Cache
 import java.io.File
 
+
 fun provideHttpClient(context: Context): HttpClient {
     val cacheSize = 10 * 1024 * 1024 // 10 MB
     val cacheDir = File(context.cacheDir, "http_cache")
