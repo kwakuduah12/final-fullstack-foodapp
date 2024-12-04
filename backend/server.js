@@ -16,7 +16,7 @@ const merchantRoutes = require('./routes/merchantsRoutes');
 const orderRoutes = require('./routes/orderRoutes'); 
 const cartRoutes = require('./routes/cartRoutes');  
 const paymentRoutes = require('./routes/paymentRoutes'); 
-const promotionRoutes = require('./routes/promotionRoutes'); // Import promotion routes
+//const promotionRoutes = require('./routes/promotionRoutes'); // Import promotion routes
 
 // Middleware setup
 app.use(cors());
@@ -32,7 +32,7 @@ app.use('/merchant', merchantRoutes);
 app.use('/order', orderRoutes);
 app.use('/cart', cartRoutes);
 app.use('/payment', paymentRoutes);
-app.use('/promotion', promotionRoutes); // Mount promotion routes
+//app.use('/promotion', promotionRoutes); // Mount promotion routes
 
 // Database connection
 const connectDB = async () => {
@@ -47,10 +47,6 @@ const connectDB = async () => {
 };
 connectDB();
 
-// Default route
-app.get('/', (req, res) => {
-    res.send('Hello World');
-});
 
 // Start server
 app.listen(port, '0.0.0.0', () => {
