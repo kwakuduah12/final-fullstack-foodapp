@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import '../Styles/BecomeMerchant.css';
-// import LoginPopup from './LoginPopUp';
 import LoginPopup from './LoginPopup'; // Import LoginPopup component
 
 const BecomeMerchant = () => {
