@@ -1,37 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { FaBell, FaUserCircle } from 'react-icons/fa'; // Importing profile icon
+import { FaBell, FaUserCircle } from 'react-icons/fa'; 
+import { useNavigate } from 'react-router-dom';
 import '../Styles/MerchantHome.css';
-
 import Menu from './Menu'; 
 import { useAuth } from './userContext';
-import axios from 'axios'; // Import axios for backend communication
+import axios from 'axios'; 
+import Burger from '../Assets/Food1.png'
+
 
 const MerchantHome = () => {
+  const { userInfo } = useAuth(); 
+  const merchantId = userInfo._id;
   const [activeSection, setActiveSection] = useState('dashboard'); 
   const [orders, setOrders] = useState([]); 
   const [mostOrderedFoods, setMostOrderedFoods] = useState([]); 
-  const [selectedOrder, setSelectedOrder] = useState(null); // For the selected order details
-  const [orderModalOpen, setOrderModalOpen] = useState(false); // Controls modal visibility
-  const [profile, setProfile] = useState(null); // For storing merchant profile
-  const [storeTypes, setStoreTypes] = useState([]); // Available store types
+  const [selectedOrder, setSelectedOrder] = useState(null); 
+  const [orderModalOpen, setOrderModalOpen] = useState(false); 
+  const [profile, setProfile] = useState(null); 
+  const [storeTypes, setStoreTypes] = useState([]); 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [passwordError, setPasswordError] = useState(''); // For password validation errors
-  const [cashAccount, setCashAccount] = useState([]); // Stores completed orders
-  const [totalCash, setTotalCash] = useState(0); // Stores the total cash amount  
-
+  const [passwordError, setPasswordError] = useState(''); 
+  const [cashAccount, setCashAccount] = useState([]); 
+  const [totalCash, setTotalCash] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const navigate = useNavigate(); 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
+  const [showSignOutConfirmation, setShowSignOutConfirmation] = useState(false);
 
   useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch(`http://localhost:4000/reviews/${merchantId}`, {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setReviews(data.data);
+        } else {
+          console.error("Failed to fetch reviews:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
     fetchOrders();
     fetchMostOrderedFoods();
     if (activeSection === 'profile') {
       fetchProfile();
-      fetchStoreTypes();// Fetch profile only when the profile section is active
+      fetchStoreTypes();
     }
-  }, [activeSection]);
+    if (activeSection === 'reviews') { 
+      fetchReviews();
+    }
+  }, [activeSection, merchantId]);
 
   const fetchOrders = async () => {
     try {
@@ -40,12 +66,16 @@ const MerchantHome = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         },
       });
-      const data = await response.json();
-      if (response.ok) {
-        setOrders(data.data);
-      } else {
-        console.error("Failed to fetch orders:", data.message);
+  
+      const text = await response.text(); 
+      console.log(text); 
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${text}`);
       }
+  
+      const data = JSON.parse(text); 
+      setOrders(data.data); 
     } catch (error) {
       console.error("Error fetching orders:", error);
     }
@@ -78,7 +108,7 @@ const MerchantHome = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        setProfile(data.data); // Store the profile data
+        setProfile(data.data); 
       } else {
         console.error("Failed to fetch profile:", data.message);
       }
@@ -107,8 +137,8 @@ const MerchantHome = () => {
     setActiveSection(section);
   };
   const handleSeeDetails = (order) => {
-    setSelectedOrder(order); // Set the selected order
-    setOrderModalOpen(true); // Open the modal
+    setSelectedOrder(order); 
+    setOrderModalOpen(true); 
   };
 
   const handleStatusChange = (newStatus) => {
@@ -126,9 +156,9 @@ const MerchantHome = () => {
         if (response.status === 200) {
           alert(`Order status updated to: ${newStatus}`);
           setOrderModalOpen(false);
-          fetchOrders(); // Refresh the orders list
+          fetchOrders(); 
   
-          // Add items to Cash Account if the status is 'Completed'
+          
           if (newStatus === 'Completed') {
             console.log('Order marked as Completed:', selectedOrder);
 
@@ -137,11 +167,11 @@ const MerchantHome = () => {
               name: item.menu_item_id?.item_name || 'Unknown Item',
               price: item.menu_item_id?.price || 0,
               quantity: item.quantity,
-              orderId: selectedOrder._id, // Track which order the item belongs to
+              orderId: selectedOrder._id, 
             }));
             console.log('Completed Items:', completedItems);
   
-            // Update the cash account state
+            
             setCashAccount((prev) => {
               const updatedAccount = [...prev, ...completedItems];
               console.log('Updated Cash Account:', updatedAccount);
@@ -265,12 +295,20 @@ const MerchantHome = () => {
       }
     }
   };
+  const handleSignOut = () => {
+    // Clear the token from local storage
+    localStorage.removeItem('token');
+
+    // Redirect to the login page
+    navigate('/'); // Use navigate instead of history.push
+  };
 
   return (
     <div className="home-page">
       <HeaderHome />
       <div className="main-container">
-        <Sidebar handleMenuClick={handleMenuClick} />
+        <Sidebar handleMenuClick={handleMenuClick}
+        handleSignOut={() => setShowSignOutConfirmation(true)}/>
         <div className="main-content">
           {activeSection === 'dashboard' && (
             <div>
@@ -319,7 +357,7 @@ const MerchantHome = () => {
                     mostOrderedFoods.map((food) => (
                       <div key={food._id} className="food-item">
                         <img
-                          src={food.imageUrl || '/default-food.png'}
+                          src={food.imageUrl || Burger}
                           alt={food.item_name || 'Food Item'}
                         />
                         <p>{food.item_name}</p>
@@ -444,10 +482,23 @@ const MerchantHome = () => {
 
 
 
-          {(activeSection === 'reviews' || activeSection === 'promotions') && (
+{activeSection === 'reviews' && (
             <div className="section">
-              <h2>Under Construction</h2>
-              <p>This section is still under construction. Please check back later!</p>
+              <h2>User Reviews</h2>
+              <div className="reviews-container">
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <div key={review._id} className="review-card">
+                      <h4>{review.user_id.username || 'Anonymous'}</h4>
+                      <p>Rating: {review.rating} / 5</p>
+                      <p>{review.comment}</p>
+                      <p>{new Date(review.review_date).toLocaleDateString()}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p>No reviews available.</p>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -633,6 +684,17 @@ const MerchantHome = () => {
     </div>
   </div>
 )}
+{
+  showSignOutConfirmation && (
+    <div className="modal">
+      <div className="modal-content">
+        <h3>Are you sure you want to sign out?</h3>
+        <button onClick={handleSignOut} className="confirm-button">Yes, Sign Out</button>
+        <button onClick={() => setShowSignOutConfirmation(false)} className="cancel-button">Cancel</button>
+      </div>
+    </div>
+  )}
+
 
       <Footer />
     </div>
@@ -641,7 +703,8 @@ const MerchantHome = () => {
 
 
 
-const Sidebar = ({ handleMenuClick }) => {
+
+const Sidebar = ({ handleMenuClick, handleSignOut }) => {
   const [activeSection, setActiveSection] = useState('dashboard');
 
   const handleClick = (section) => {
@@ -672,20 +735,14 @@ const Sidebar = ({ handleMenuClick }) => {
           Reviews
         </li>
         <li
-          className={activeSection === 'promotions' ? 'active' : ''}
-          onClick={() => handleClick('promotions')}
-        >
-          Promotions
-        </li>
-      </ul>
-      <hr className="divider" />
-      <ul className="sidebar-bottom-menu">
-        <li
           className={activeSection === 'menu' ? 'active' : ''}
           onClick={() => handleClick('menu')}
         >
           Menu
         </li>
+      </ul>
+      <hr className="divider" />
+      <ul className="sidebar-bottom-menu">
         <li
           className={activeSection === 'profile' ? 'active' : ''}
           onClick={() => handleClick('profile')}
@@ -698,7 +755,7 @@ const Sidebar = ({ handleMenuClick }) => {
         >
           Cash Account</li>
         <li>Help</li>
-        <li>Sign Out</li>
+        <li onClick={handleSignOut}>Sign Out</li>
       </ul>
     </div>
   );
@@ -714,11 +771,6 @@ const HeaderHome = () => {
       <div className="header-center">
         {/* Add the welcome message */}
         <h2 className="welcome-text">Welcome! {userInfo?.store_name || "Your Store"}</h2>
-
-        {/* The "View Store As A Customer" button */}
-        <button className="user-button">
-          <span className="user-text">View Store As A Customer</span>
-        </button>
       </div>
       <div className="header-right">
         <FaBell className="icon" />

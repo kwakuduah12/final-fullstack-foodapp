@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import '../Styles/BecomeMerchant.css';
-import LoginPopup from './LoginPopup'; // Import LoginPopup component
 
 const BecomeMerchant = () => {
-  // const [storeType, setStoreType] = useState('');
-  const [registered, setRegistered] = useState(false);
-  const [error, setError] = useState(''); // State to store error message
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     storeName: '',
     address: '',
@@ -15,7 +12,6 @@ const BecomeMerchant = () => {
     phone: '',
     storeType: ''
   });
-  const [isSignInPopupOpen, setSignInPopupOpen] = useState(false); // State to control LoginPopup visibility
 
   const storeTypes = ['Asian', 'Mexican', 'African', 'Italian'];
 
@@ -46,9 +42,10 @@ const BecomeMerchant = () => {
 
       if (response.ok) {
         console.log('Signup successful');
-        setRegistered(true);
-        setSignInPopupOpen(true);
         setError(''); // Clear error if registration is successful
+        
+        // Redirect to landing page
+        window.location.href = '/'; // Adjust the path as necessary
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'Signup failed. Please try again.');
@@ -59,35 +56,12 @@ const BecomeMerchant = () => {
     }
   };
 
-  const handleSignInClose = () => {
-    setSignInPopupOpen(false);
-  };
-
-  if (registered && isSignInPopupOpen) {
-    return (
-      <LoginPopup
-        isVisible={isSignInPopupOpen}
-        onClose={handleSignInClose}
-        onSubmit={(e) => {
-          e.preventDefault();
-          // Add login logic here if needed
-          handleSignInClose();
-        }}
-        selectedRole="Merchant"
-        handleRoleChange={() => {}}
-        toggleForgotPasswordPopup={() => {}}
-        toggleSignUpPopup={() => {}}
-        errorMessage={error}
-      />
-    );
-  }
-
   return (
     <div className="merchant-page">
       <section className="hero-section">
         <div className="register-card">
           <h2>Register Your Store</h2>
-          {error && <p className="error-message">{error}</p>} {/* Display error message */}
+          {error && <p className="error-message">{error}</p>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="storeName">Name of Store</label>
@@ -142,4 +116,3 @@ const BecomeMerchant = () => {
 };
 
 export default BecomeMerchant;
-

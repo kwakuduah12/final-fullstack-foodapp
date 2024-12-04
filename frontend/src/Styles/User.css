@@ -1,0 +1,482 @@
+/* Existing CSS */
+
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
+
+.home-page {
+  display: flex;
+  flex-direction: column; 
+  height: 100vh;
+}
+
+.main-container {
+  display: flex; 
+  flex: 1; 
+}
+
+.main-content {
+  flex: 1; 
+  padding: 20px; 
+}
+
+.sidebar {
+  width: 200px; 
+  background-color: white; 
+  padding: 20px; 
+  display: flex;
+  flex-direction: column;
+  height: 100vh; 
+  border-right: 1px solid #dee2e6;
+}
+
+.divider {
+  height: 1px;
+  width: 80%;
+  background-color: #dee2e6;
+  margin: 20px auto;
+}
+
+.sidebar-menu, .sidebar-bottom-menu {
+  list-style: none; 
+  padding: 0;
+}
+
+.sidebar-menu li, .sidebar-bottom-menu li {
+  padding: 10px 15px; 
+  display: flex;
+  align-items: center; 
+  cursor: pointer; 
+}
+
+.sidebar-menu li:hover, .sidebar-bottom-menu li:hover {
+  background-color: #ee9211; 
+  border-radius: 20px;
+  color: white;
+}
+
+.sidebar-menu li.active, .sidebar-bottom-menu li.active {
+  background-color: #ee9211;
+  color: white;
+  border-radius: 20px;
+}
+
+.sidebar-menu li svg, .sidebar-bottom-menu li svg {
+  margin-right: 10px;
+}
+
+.header-home {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #fff; 
+  width: 100%; 
+  border-bottom: 1px solid #dee2e6; 
+}
+
+.header-left {
+  flex: 1; 
+  min-width: 150px; 
+}
+
+.logo {
+  font-size: 24px; 
+  font-weight: bold; 
+  color:  #ee9211; 
+}
+
+.header-center {
+  flex: 2; 
+  display: flex;
+  flex-direction: column; 
+  align-items: center;
+  justify-content: center; 
+  gap: 10px; 
+}
+
+.welcome-text {
+  font-size: 20px; 
+  font-weight: bold; 
+  color: black; 
+  margin-bottom: 10px; 
+  text-align: center; 
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  flex: 1; 
+  justify-content: flex-end; 
+}
+
+.icon {
+  margin-left: 20px; 
+  font-size: 24px; 
+  cursor: pointer;
+}
+
+.icon:hover {
+  color: #ee9211; 
+}
+
+.section {
+  margin-top: 20px;
+}
+
+.section-title {
+  font-size: 24px;
+  text-align: left; 
+  margin-bottom: 10px;
+}
+
+.order-list, .food-list {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: space-between;
+  gap: 20px; 
+}
+
+.order, .food-item {
+  background-color: #fff; 
+  border: 1px solid #dee2e6; 
+  border-radius: 8px; 
+  padding: 15px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.2s; 
+  flex: 1 1 calc(30% - 20px); 
+  min-width: 200px; 
+}
+
+.order:hover, .food-item:hover {
+  transform: translateY(-5px); 
+}
+
+.order p, .food-item p {
+  margin: 10px 0; 
+}
+
+.food-item img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.see-details-link {
+  color: #1c1c1b;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.see-details-link:hover {
+  color: #ee9211; 
+}
+
+.footer {
+  background-color:  #343333; 
+  padding: 20px; 
+  text-align: center;
+  width: 100%;
+  border-top: 1px solid #dee2e6; 
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.social-links a {
+  color: #ee9211;
+  margin: 0 10px;
+  text-decoration: none;
+}
+
+.social-links a:hover {
+  text-decoration: underline;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure the modal appears above other elements */
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px; /* Limit the width of the modal */
+  max-height: 80vh; /* Limit the height of the modal to 80% of the viewport */
+  overflow-y: auto; /* Add vertical scrolling if content exceeds the height */
+}
+
+/* Modal Button Styles */
+.modal-content button {
+  padding: 10px 20px; /* Padding for buttons */
+  border: none;
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer;
+  font-size: 16px; /* Font size */
+  margin: 5px; /* Margin between buttons */
+  transition: background-color 0.3s ease; /* Smooth background transition */
+}
+
+/* Confirm Button Style */
+.confirm-button {
+  background-color: #28a745; /* Green for confirm */
+  color: white; /* White text */
+}
+
+.confirm-button:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+/* Cancel Button Style */
+.cancel-button {
+  background-color: #dc3545; /* Red for cancel */
+  color: white; /* White text */
+}
+
+.cancel-button:hover {
+  background-color: #c82333; /* Darker red on hover */
+}
+
+/* Buttons in Other Parts */
+button.edit-btn, button.delete-btn {
+  margin: 5px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.edit-btn {
+  background-color: #ee9211;
+  color: white;
+}
+
+button.delete-btn {
+  background-color: #e0e0e0;
+  color: black;
+}
+.category-icons {
+  margin: 20px;
+  text-align: center;
+}
+
+.category-icons-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.category-icon {
+  margin: 10px;
+  padding: 10px;
+  text-align: center;
+  width: 100px;
+}
+
+.category-icon p {
+  margin-top: 8px;
+}
+
+.orders-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.order-card {
+  background-color: #fff; 
+  border: 1px solid #dee2e6; 
+  border-radius: 8px; 
+  padding: 15px; 
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); 
+  transition: transform 0.2s; 
+  flex: 1 1 calc(30% - 20px); 
+  min-width: 200px; 
+}
+
+.order-card:hover {
+  transform: translateY(-5px); /* Hover effect to lift the card */
+}
+
+.order-status {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.order-status-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.order-status-cancelled {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.order-status-default {
+  background-color: #ffeeba;
+  color: #856404;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center align icon and details */
+  text-align: center; /* Center align text */
+  gap: 20px; /* Add spacing between icon and details */
+  margin: 20px auto;
+  padding: 20px;
+  max-width: 600px; /* Limit the width of the profile section */
+}
+
+.profile-icon {
+  font-size: 150px; /* Increase the size of the icon */
+  color: #e0e0e0; /* Set a default color for the icon */
+  margin-bottom: 1rem; /* Add spacing below the icon */
+}
+
+/* Form Group */
+.form-group {
+  margin-bottom: 15px;
+}
+
+form input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+/* Change Password Button */
+.change-password-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  margin-top: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.change-password-btn:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
+}
+
+/* Search Bar Styles */
+.header-center {
+  display: flex;
+  flex-direction: column; /* Stack the welcome message and search bar */
+  align-items: center; /* Center align items */
+}
+
+.search-bar {
+  margin-top: 10px; /* Space between the welcome message and search bar */
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 20px; /* Rounded corners */
+  width: 100%; /* Full width */
+  max-width: 400px; /* Limit width */
+}
+
+.search-bar:focus {
+  outline: none;
+  border-color: #ee9211; /* Change border color on focus */
+}
+
+.restaurants-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.restaurant-card {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 15px;
+  width: calc(30% - 20px); /* Adjust to fit three cards per row */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.restaurant-card:hover {
+  transform: translateY(-5px);
+}
+
+.order-button {
+  background-color: #ee9211;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  cursor: pointer;
+}
+
+.order-button:hover {
+  background-color: #d48a10;
+}
+
+.categories-container {
+  display: flex;              /* Use flexbox for horizontal alignment */
+  justify-content: space-around; /* Distribute space evenly */
+  padding: 20px;
+  flex-wrap: wrap;          /* Allow wrapping to the next line if needed */
+}
+
+.category-card {
+  text-align: center;        /* Center-align text under icons */
+  padding: 10px;
+  cursor: pointer;           /* Change cursor to pointer on hover */
+  transition: transform 0.2s; /* Add hover effect */
+}
+
+.category-card:hover {
+  transform: scale(1.05);   /* Slightly enlarge icon on hover */
+}
+
+.category-icon {
+  font-size: 2rem;          /* Adjust icon size */
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .profile-icon {
+      font-size: 100px; /* Reduce icon size for smaller screens */
+  }
+
+  .profile-details p {
+      font-size: 0.9rem; /* Adjust text size for readability */
+  }
+}

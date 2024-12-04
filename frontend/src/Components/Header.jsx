@@ -52,9 +52,9 @@ const Header = () => {
         
         // Navigate based on role
         if (selectedRole === 'Merchant') {
-          navigate('/merchanthome'); // Redirect to MerchantHome
+          navigate('/merchanthome'); 
         } else {
-          navigate('/home-page'); // Redirect to HomePage
+          navigate('/home-page'); 
         }
       } else {
         console.error("Sign In Failed");

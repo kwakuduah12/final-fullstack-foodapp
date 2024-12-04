@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../Styles/Menu.css';
 import { FaPlus, FaEdit, FaTrash } from 'react-icons/fa'; // Import FaTrash for the delete icon
+import Sushi from '../Assets/pizza.png'
 
 const Menu = () => {
   const [showAddFoodPopup, setShowAddFoodPopup] = useState(false);
@@ -145,7 +146,7 @@ const Menu = () => {
       <div className="food-list">
         {foods.map((food) => (
           <div key={food._id} className="food-card">
-            <img src={food.image || 'path/to/default-image.jpg'} alt="Food" className="food-image" />
+            <img src={food.image || Sushi} alt="Food" className="food-image" />
             <div className="food-info">
               <h3>
                 {food.item_name}{' '}
