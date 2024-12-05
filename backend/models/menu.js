@@ -13,6 +13,7 @@ const MenuSchema = new mongoose.Schema({
   },
   description: { type: String },
   price: { type: Number, required: true },
+  discountedPrice: { type: Number }, // Discounted price field
   category: {
     type: String,
     enum: ["Appetizer", "Main Course", "Dessert", "Drink", "Other"],

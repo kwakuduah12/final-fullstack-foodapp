@@ -48,9 +48,9 @@ const UserSchema = new mongoose.Schema({
         required: [true, 'Please enter a password'],
         minlength: [6, 'Minimum password length is 6 characters'],
     },
-    wallet_balance: { // Changed from "wallet"
+    balance: { // New field to track the user's fake money balance
         type: Number,
-        default: 100,
+        default: 0,
     },
 });
 
