@@ -2,8 +2,10 @@ package com.example.homedasher_prod
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.auth0.android.jwt.JWT
 
 
 fun saveJwtSecurely(token: String, role: String, context: Context) {
@@ -82,5 +84,34 @@ fun performLogout(context: Context) {
         remove("jwt")
         remove("role")
         apply()
+    }
+}
+
+
+fun isJwtValid(jwt: String?): Boolean {
+    return try {
+        val decodedJWT = jwt?.let { JWT(it) }
+        // Check if the token is expired with a 10-second leeway
+        !decodedJWT?.isExpired(10)!!
+    } catch (e: Exception) {
+        false
+    }
+}
+
+fun getIdFromJwt(context: Context): String? {
+    val jwt = getStoredJwt(context) // Retrieve the stored JWT token
+    return try {
+        val decodedJWT = jwt?.let { JWT(it) }
+        val id = decodedJWT?.getClaim("id")?.asString() // "id" is the key for the user ID
+        if (id.isNullOrEmpty()) {
+            Log.e("JWTError", "ID claim not found or empty in JWT.")
+            null
+        } else {
+            Log.d("JWTInfo", "Extracted ID: $id")
+            id
+        }
+    } catch (e: Exception) {
+        Log.e("JWTError", "Error decoding JWT: ${e.message}")
+        null
     }
 }

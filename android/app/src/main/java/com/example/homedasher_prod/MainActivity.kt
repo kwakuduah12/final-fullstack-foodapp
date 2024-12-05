@@ -1,6 +1,5 @@
 package com.example.homedasher_prod
 
-import MerchantHomeScreen
 import UserMenuScreen
 import android.content.Context
 import android.content.SharedPreferences
@@ -14,14 +13,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.homedasher_prod.ui.theme.HomeDasherProdTheme
-
-import android.util.Log
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
+import androidx.navigation.compose.*
+import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.navArgument
+import com.example.homedasher_prod.ui.theme.HomeDasherProdTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,7 +37,6 @@ class MainActivity : ComponentActivity() {
         val context = LocalContext.current
         val startDestination = determineStartDestination(context)
 
-        // State to hold cart information, now CartData type
         val cartState = remember { mutableStateOf<CartData?>(null) }
 
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -53,24 +50,33 @@ class MainActivity : ComponentActivity() {
                         context = LocalContext.current,
                         userId = cartState.value?.user_id ?: "",
                         navController = navController
+
                     )
                 }
                 composable("login") { LoginScreen(navController) }
                 composable("register") { RegisterScreen(navController) }
                 composable("merchantRegistration") { MerchantRegistrationScreen(navController) }
                 composable("userHomeScreen") {
+                    val userid = getIdFromJwt(context)
                     HomeScreen(
                         context = LocalContext.current,
                         userId = cartState.value?.user_id ?: "",
                         navController = navController
                     )
                 }
-                composable("merchantHomeScreen") {
+                composable(
+                    "merchantHomeScreen/{merchantId}",
+                    arguments = listOf(navArgument("merchantId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val merchantId = backStackEntry.arguments?.getString("merchantId") ?: ""
+                    Log.d("MainContent", "merchantId: $merchantId")
                     MerchantHomeScreen(
-                        navController,
-                        context = LocalContext.current
+                        context = context,
+                        merchantId = merchantId,
+                        navController = navController
                     )
                 }
+
                 composable("category/{storeType}") { backStackEntry ->
                     val storeType = backStackEntry.arguments?.getString("storeType")
                     if (storeType != null) {
@@ -92,21 +98,17 @@ class MainActivity : ComponentActivity() {
                         navArgument("userId") { type = NavType.StringType }
                     )
                 ) { backStackEntry ->
-                    val storeName = backStackEntry.arguments?.getString("storeName")
-                    val merchantId = backStackEntry.arguments?.getString("merchantId")
-                    val userId = backStackEntry.arguments?.getString("userId")
-
-                    if (storeName != null && merchantId != null && userId != null) {
-                        UserMenuScreen(
-                            context = LocalContext.current,
-                            merchantId = merchantId,
-                            userId = userId
-                        )
-                    } else {
-                        Log.e("MainContent", "Required arguments are null")
-                    }
+                    val storeName = backStackEntry.arguments?.getString("storeName") ?: "Store"
+                    val merchantId = backStackEntry.arguments?.getString("merchantId") ?: ""
+                    val userId = backStackEntry.arguments?.getString("userId") ?: ""
+                    UserMenuScreen(
+                        context = LocalContext.current,
+                        merchantId = merchantId,
+                        userId = userId,
+                        storeName = storeName,
+                        navController = navController
+                    )
                 }
-                // Add UserCartItems route
                 composable("userCartItems/{userId}", arguments = listOf(navArgument("userId") { type = NavType.StringType })) { backStackEntry ->
                     val userId = backStackEntry.arguments?.getString("userId")
                     if (userId != null) {
@@ -115,15 +117,75 @@ class MainActivity : ComponentActivity() {
                         Log.e("MainContent", "userId is null")
                     }
                 }
+                composable(
+                    "profile/{profileId}",
+                    arguments = listOf(navArgument("profileId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val profileId = backStackEntry.arguments?.getString("profileId")
+                    if (profileId != null) {
+                        ProfileScreen(profileId = profileId, context = LocalContext.current)
+                    } else {
+                        Log.e("MainContent", "profileId is null")
+                    }
+                }
+                composable(
+                    "merchantMenuScreen/{merchantId}",
+                    arguments = listOf(navArgument("merchantId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val merchantId = backStackEntry.arguments?.getString("merchantId") ?: ""
+                    MerchantMenuScreen(context = LocalContext.current, merchantId = merchantId)
+                }
+                composable(
+                    "merchantOrdersScreen/{merchantId}",
+                    arguments = listOf(navArgument("merchantId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val merchantId = backStackEntry.arguments?.getString("merchantId") ?: ""
+                    MerchantOrdersScreen(navController = navController, merchantId = merchantId)
+                }
+                composable("map") {
+                    val viewModel: MerchantViewModel = viewModel()
+                    val user = getIdFromJwt(context)
+
+                    LaunchedEffect(Unit) {
+                        viewModel.fetchMerchants(context)
+                    }
+                    if (user != null) {
+                        MerchantMapScreen(
+                            apiKey = "-",
+                            merchants = viewModel.merchants,
+                            navController = navController,
+                            userId = user
+                        )
+                    }
+                }
+                composable(
+                    "merchantPromotionsScreen/{merchantId}",
+                    arguments = listOf(navArgument("merchantId") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val merchantId = backStackEntry.arguments?.getString("merchantId") ?: ""
+                    MerchantPromotionScreen(
+                        context = LocalContext.current,
+                        merchantId = merchantId,
+                        navController = navController
+                    )
+                }
+
+
             }
         }
     }
 
     private fun determineStartDestination(context: Context): String {
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
-        val isAuthenticated = checkAuthenticationStatus(context)
-        val lastDestination = sharedPreferences.getString("last_destination", "home") ?: "home"
-
-        return if (isAuthenticated) lastDestination else "login"
+        val sharedPreferences: SharedPreferences = context.getSharedPreferences("jwt_prefs", Context.MODE_PRIVATE)
+        val jwt = getStoredJwt(context)
+        val role = getStoredRole(context)
+        val merchantId = getIdFromJwt(context)
+        return when {
+            isJwtValid(jwt) && role == "Merchant" && merchantId != null -> "merchantHomeScreen/$merchantId"
+            isJwtValid(jwt) && role == "User" && merchantId != null -> "userHomeScreen"
+            else -> "login"
+        }
     }
+
+
 }

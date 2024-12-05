@@ -68,19 +68,26 @@ const MerchantSchema = new mongoose.Schema({
     },
     store_type: {
         type: String,
-        enum: ['African', 'Mexican', 'Asian', 'Italian', 'Other'],
+        enum: ['African', 'Mexican', 'Asian', 'Italian', 'Other'], 
         required: true,
+    },
+    created_at: {
+        type: Date,
+        default: Date.now,
+    },
+    updated_at: {
+        type: Date,
+        default: Date.now,
     },
     password: {
         type: String,
         required: [true, 'Please enter a password'],
         minlength: [6, 'Minimum password length is 6 characters'],
     },
-    // // wallet_balance: { // Changed from "wallet"
-    // //     type: Number,
-    // //     default: 100,
-    // // },
-    // wallet_balance: { type: Number, default: 100, validate: { validator: v => v >= 0, message: 'Balance cannot be negative' } },
+    balance: { // New field to track the merchant's fake money balance
+        type: Number,
+        default: 0,
+    },
 });
 
 module.exports = mongoose.model('Merchant', MerchantSchema);
