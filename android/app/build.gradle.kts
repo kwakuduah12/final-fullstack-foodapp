@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.homedasher_prod"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.homedasher_prod"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = 21
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -52,6 +52,7 @@ android {
 
 dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     val nav_version = "2.8.2"
 
     implementation("androidx.navigation:navigation-compose:$nav_version")
@@ -76,6 +77,14 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:2.x.x")
     implementation("io.ktor:ktor-client-core:2.x.x")
     implementation("com.squareup.okhttp3:okhttp:4.x.x")
+    implementation("com.auth0.android:jwtdecode:2.0.1")
+    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("com.google.maps.android:maps-compose:6.2.1")
+    implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation("androidx.compose.material3:material3:1.2.0") // Or latest stable version
+    implementation("androidx.compose:compose-bom:2023.10.00") // Replace with the latest BOM version
+    implementation ("androidx.compose.material3:material3")
+    implementation(libs.maps.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
