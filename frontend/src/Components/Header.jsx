@@ -48,9 +48,9 @@ const Header = () => {
 
       if (response.ok) {
         const data = await response.json();
-        login(data.token); // Use login from context to save token
+        login(data.token); 
         
-        // Navigate based on role
+        
         if (selectedRole === 'Merchant') {
           navigate('/merchanthome'); 
         } else {
